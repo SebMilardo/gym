@@ -1,0 +1,1551 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f8fc">
+  <title>GRIT — Piano di allenamento</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f3f8fc;
+      --card: #fff;
+      --ink: #17251f;
+      --muted: #78827c;
+      --line: #e7ebe5;
+      --sky: #b8e4ff;
+      --sky-dark: #2874a5;
+      --blue: #4265e8;
+      --orange: #ff8a52;
+      --shadow: 0 16px 42px rgba(30, 48, 37, .07);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 91% 4%, rgba(117, 195, 245, .19), transparent 22rem),
+        var(--paper);
+      color: var(--ink);
+      font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; touch-action: manipulation; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(66, 101, 232, .35);
+      outline-offset: 2px;
+    }
+    .shell { max-width: 1280px; margin: 0 auto; padding: 0 34px 56px; }
+    .topbar {
+      height: 82px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(23, 37, 31, .08);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
+    .brand-mark {
+      display: grid; place-items: center; width: 39px; height: 39px; border-radius: 13px;
+      background: var(--ink); color: var(--sky); font-size: 15px; font-weight: 900; letter-spacing: -1px;
+    }
+    .brand-name { font-size: 15px; font-weight: 850; letter-spacing: .12em; }
+    .brand-sub { display: block; margin-top: -3px; color: var(--muted); font-size: 9px; font-weight: 750; letter-spacing: .15em; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .icon-button, .quiet-button {
+      border: 1px solid var(--line); background: rgba(255,255,255,.75); color: var(--ink);
+      border-radius: 12px; min-height: 40px; padding: 0 13px; font-size: 12px; font-weight: 750;
+    }
+    .icon-button:hover, .quiet-button:hover { border-color: #cbd4ca; background: #fff; }
+    .hero {
+      display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 34px; align-items: center;
+      padding: 38px 0 30px;
+    }
+    .eyebrow { color: var(--sky-dark); font-size: 10px; font-weight: 850; letter-spacing: .17em; text-transform: uppercase; }
+    h1 { margin: 9px 0 12px; max-width: 700px; font-size: clamp(36px, 5.2vw, 65px); line-height: .98; letter-spacing: -.065em; }
+    h1 span { color: var(--sky-dark); }
+    .hero-copy { max-width: 590px; margin: 0; color: #647169; font-size: 15px; }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 21px; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: 99px;
+      background: #fff; border: 1px solid var(--line); color: #56635a; font-size: 11px; font-weight: 750;
+    }
+    .tag-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sky-dark); }
+    .hero-card {
+      position: relative; overflow: hidden; min-height: 205px; padding: 22px; border-radius: 25px;
+      background: var(--ink); color: white; box-shadow: var(--shadow);
+    }
+    .hero-card::after {
+      content: ""; position: absolute; width: 190px; height: 190px; right: -56px; bottom: -92px;
+      border: 1px solid rgba(184, 228, 255, .48); border-radius: 50%;
+      box-shadow: 0 0 0 18px rgba(184,228,255,.08), 0 0 0 38px rgba(184,228,255,.05);
+    }
+    .hero-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .hero-card-label { color: #a8b8ad; font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .hero-week { margin: 13px 0 3px; font-size: 34px; line-height: 1; font-weight: 850; letter-spacing: -.05em; }
+    .hero-date { color: #bac6be; font-size: 12px; }
+    .ring {
+      --progress: 0%;
+      display: grid; place-items: center; width: 67px; height: 67px; border-radius: 50%;
+      background: conic-gradient(var(--sky) var(--progress), rgba(255,255,255,.13) 0);
+    }
+    .ring::before {
+      content: ""; grid-area: 1 / 1; width: 53px; height: 53px; border-radius: 50%; background: var(--ink);
+    }
+    .ring strong { z-index: 1; grid-area: 1 / 1; font-size: 12px; }
+    .hero-card-bottom { position: relative; z-index: 1; margin-top: 20px; display: flex; justify-content: space-between; align-items: end; }
+    .hero-card-bottom strong { display: block; font-size: 12px; }
+    .hero-card-bottom span { display: block; color: #a8b8ad; font-size: 10px; margin-top: 2px; }
+    .hero-card-bottom .sky-text { color: var(--sky); font-size: 12px; font-weight: 800; }
+    .stats {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 25px;
+    }
+    .stat {
+      padding: 16px 18px; min-height: 104px; border: 1px solid var(--line); border-radius: 18px;
+      background: rgba(255,255,255,.82);
+    }
+    .stat-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    .stat-value { margin-top: 7px; font-size: 25px; line-height: 1.1; font-weight: 850; letter-spacing: -.04em; }
+    .stat-foot { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, .8fr); gap: 20px; align-items: start; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 21px 22px 15px; }
+    .panel-title { margin: 0; font-size: 18px; letter-spacing: -.035em; }
+    .panel-subtitle { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .week-controls { display: flex; align-items: center; gap: 7px; }
+    .week-arrow {
+      width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); font-size: 18px;
+    }
+    .week-select {
+      height: 36px; border: 1px solid var(--line); border-radius: 10px; padding: 0 9px;
+      background: #fff; color: var(--ink); font-size: 12px; font-weight: 750;
+    }
+    .schedule-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0 22px 20px; }
+    .schedule-card {
+      position: relative; overflow: hidden; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: #fcfdfb;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .schedule-card:hover { transform: translateY(-2px); border-color: #cbd5ca; box-shadow: 0 9px 18px rgba(30,48,37,.06); }
+    .schedule-card.selected { border-color: var(--sky-dark); box-shadow: inset 0 0 0 1px var(--sky-dark); }
+    .schedule-card.complete { background: #f0f8fe; }
+    .schedule-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .session-code { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 10px; font-weight: 900; font-size: 12px; }
+    .code-a { color: #2f6790; background: #e5f3fd; }
+    .code-b { color: #3956cb; background: #e9edff; }
+    .code-c { color: #b85b2a; background: #fff0e7; }
+    .day-label { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .schedule-name { margin: 13px 0 3px; font-size: 13px; font-weight: 850; letter-spacing: -.02em; }
+    .schedule-date { color: var(--muted); font-size: 11px; }
+    .schedule-run { margin-top: 13px; display: flex; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .schedule-run strong { font-size: 13px; }
+    .schedule-run span { color: var(--muted); font-size: 10px; text-align: right; }
+    .schedule-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+    .status-pill { padding: 4px 7px; border-radius: 99px; background: #f0f2ef; color: #6a756e; font-size: 9px; font-weight: 800; }
+    .status-pill.done { color: #2f6790; background: #e2f1fc; }
+    .open-session { border: 0; padding: 4px 0; background: transparent; color: var(--blue); font-size: 10px; font-weight: 850; }
+    .week-footer {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 22px;
+      border-top: 1px solid var(--line); color: var(--muted); font-size: 11px;
+    }
+    .week-footer strong { color: var(--ink); }
+    .deload { color: #a25b22; background: #fff2df; border-radius: 99px; padding: 5px 9px; font-size: 10px; font-weight: 800; }
+    .workout-panel { margin-top: 20px; overflow: hidden; }
+    .workout-title-wrap { min-width: 0; }
+    .workout-kicker { color: var(--sky-dark); font-size: 9px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+    .workout-heading { margin: 3px 0 0; font-size: 20px; letter-spacing: -.04em; }
+    .workout-meta { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .workout-actions { display: flex; align-items: center; gap: 8px; }
+    .complete-button {
+      min-height: 48px; padding: 0 16px; border: 0; border-radius: 11px; background: var(--ink); color: #fff;
+      font-size: 13px; font-weight: 800;
+    }
+    .complete-button:hover { background: #2a4034; }
+    .complete-button.is-complete { background: #e5f3fd; color: #2f6790; }
+    .timer-toolbar {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 22px 15px;
+    }
+    .timer-box {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 66px;
+      padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: #fbfcfa;
+    }
+    .timer-copy { min-width: 0; }
+    .timer-label { display: block; color: var(--muted); font-size: 8px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    .timer-number { display: block; margin-top: 1px; font-size: 21px; line-height: 1.1; font-weight: 900; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+    .timer-warning { color: #d33a31 !important; animation: timer-pulse .7s ease-in-out infinite alternate; }
+    @keyframes timer-pulse { to { opacity: .62; } }
+    .timer-caption { display: block; overflow: hidden; max-width: 220px; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .timer-actions { display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; }
+    .timer-action {
+      min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px;
+      background: #fff; color: var(--ink); font-size: 11px; font-weight: 800;
+    }
+    .timer-action:hover { border-color: #b6c1b6; }
+    .timer-action.primary { border-color: var(--ink); background: var(--ink); color: #fff; }
+    .timer-action:disabled { opacity: .4; cursor: not-allowed; }
+    .exercise-list { padding: 0 16px 16px; }
+    .exercise-row {
+      display: grid; grid-template-columns: 38px minmax(0, 1fr) minmax(160px, .36fr); gap: 11px; align-items: start;
+      padding: 13px 7px; border-top: 1px solid #eef0ec; transition: background .15s ease;
+    }
+    .exercise-row.is-done { background: linear-gradient(90deg, rgba(226,243,255,.72), transparent 75%); }
+    .exercise-check { display: flex; width: 38px; height: 38px; align-items: center; justify-content: center; }
+    .exercise-check input { width: 25px; height: 25px; accent-color: #3886b8; cursor: pointer; }
+    .exercise-name-line { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+    .exercise-name { margin: 0; font-size: 14px; font-weight: 850; }
+    .exercise-prescription { margin-top: 2px; color: var(--sky-dark); font-size: 12px; font-weight: 800; }
+    .exercise-description { margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .exercise-rest { color: #88938b; font-size: 10px; }
+    .exercise-timers { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .input-group { display: grid; gap: 5px; }
+    .input-group label { color: #7b867d; font-size: 9px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    .input-group input {
+      width: 100%; height: 34px; padding: 0 9px; border: 1px solid var(--line); border-radius: 9px;
+      background: #fbfcfa; color: var(--ink); font-size: 12px;
+    }
+    .input-group input::placeholder { color: #a5ada6; }
+    .run-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .run-detail {
+      margin-top: 8px; padding: 10px 11px; border-radius: 12px; background: #f1f7fb;
+      color: #56635a; font-size: 10px; line-height: 1.5;
+    }
+    .run-detail strong { color: var(--ink); }
+    .right-column { display: grid; gap: 18px; }
+    .run-panel { padding-bottom: 18px; }
+    .run-summary { margin: 0 20px; padding: 16px; border-radius: 16px; background: #eaf5fc; }
+    .run-summary-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .run-summary-label { color: #5d7890; font-size: 9px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+    .run-pace { margin-top: 4px; font-size: 24px; font-weight: 900; letter-spacing: -.05em; }
+    .run-walk { margin-top: 2px; color: #647987; font-size: 10px; }
+    .run-distance {
+      border-radius: 11px; padding: 7px 9px; background: white; color: var(--sky-dark); font-size: 13px; font-weight: 900;
+    }
+    .distance-bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+    .distance-item { padding: 9px; border-radius: 11px; background: rgba(255,255,255,.82); }
+    .distance-item span { display: block; color: var(--muted); font-size: 9px; font-weight: 800; }
+    .distance-item strong { display: block; margin-top: 2px; font-size: 14px; }
+    .run-focus { margin: 11px 20px 0; padding: 12px; border: 1px solid #d5eaf7; border-radius: 13px; background: rgba(255,255,255,.85); }
+    .run-focus-label { color: var(--sky-dark); font-size: 8px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .run-focus-main { display: flex; align-items: baseline; gap: 9px; margin-top: 3px; }
+    .run-focus-main strong { font-size: 18px; letter-spacing: -.04em; }
+    .run-focus-main span { color: #647169; font-size: 10px; font-weight: 750; }
+    .run-focus-pattern { margin-top: 4px; color: var(--muted); font-size: 9px; line-height: 1.45; }
+    .pace-note { margin: 12px 20px 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .pace-table { width: calc(100% - 40px); margin: 14px 20px 0; border-collapse: collapse; font-size: 10px; }
+    .pace-table th { padding: 7px 5px; color: #8a948c; font-size: 8px; text-align: left; text-transform: uppercase; letter-spacing: .08em; }
+    .pace-table td { padding: 7px 5px; border-top: 1px solid #eff1ed; }
+    .pace-table tr.active td { color: var(--sky-dark); font-weight: 850; background: #f1f8fd; }
+    .start-setting { display: grid; grid-template-columns: 1fr 125px; align-items: center; gap: 12px; padding: 15px 20px; border-top: 1px solid var(--line); }
+    .start-setting strong { display: block; font-size: 11px; }
+    .start-setting span { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+    .start-setting input { width: 100%; height: 34px; border: 1px solid var(--line); border-radius: 9px; padding: 0 8px; color: var(--ink); background: #fff; font-size: 10px; }
+    .goal-panel { padding: 19px 20px 20px; }
+    .goal-heading { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .goal-heading h3 { margin: 0; font-size: 15px; letter-spacing: -.03em; }
+    .goal-heading span { color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
+    .goal-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 0; border-bottom: 1px solid #eef0ec; }
+    .goal-row:last-child { padding-bottom: 0; border-bottom: 0; }
+    .goal-icon { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 auto; border-radius: 10px; background: #f1f4ef; font-size: 14px; }
+    .goal-info { flex: 1; }
+    .goal-info strong { display: block; font-size: 11px; }
+    .goal-info span { display: block; margin-top: 1px; color: var(--muted); font-size: 9px; }
+    .goal-target { color: #56635a; font-size: 10px; font-weight: 850; text-align: right; }
+    .save-note { display: flex; gap: 8px; align-items: flex-start; margin: 15px 3px 0; color: var(--muted); font-size: 9px; line-height: 1.45; }
+    .save-dot { width: 7px; height: 7px; margin-top: 4px; border-radius: 50%; background: #72a63b; flex: 0 0 auto; }
+    .toast {
+      position: fixed; z-index: 5; right: 22px; bottom: 22px; max-width: min(390px, calc(100vw - 32px));
+      padding: 12px 16px; border-radius: 12px; background: var(--ink); color: #fff;
+      box-shadow: var(--shadow); font-size: 12px; opacity: 0; transform: translateY(10px); pointer-events: none; transition: .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (pointer: coarse) {
+      .week-arrow, .week-select, .open-session, .dialog-button { min-height: 44px; }
+      .timer-action, .complete-button { min-height: 48px; }
+    }
+    .timer-dialog {
+      width: min(920px, 94vw); height: min(760px, 86vh); max-width: none; max-height: 86vh;
+      padding: 0; overflow: auto; border: 0; border-radius: 30px; background: transparent; color: var(--ink);
+      box-shadow: 0 35px 100px rgba(0,0,0,.3);
+    }
+    .timer-dialog::backdrop { background: rgba(15, 25, 19, .74); backdrop-filter: blur(7px); }
+    .timer-dialog-inner {
+      display: flex; flex-direction: column; min-height: 100%; padding: 27px 32px;
+      background: radial-gradient(circle at 88% 7%, rgba(117,195,245,.24), transparent 18rem), #fbfdff;
+    }
+    .timer-dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+    .dialog-eyebrow { color: var(--sky-dark); font-size: 10px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .dialog-exercise { margin: 6px 0 0; max-width: 720px; font-size: clamp(24px, 4vw, 42px); line-height: 1.04; letter-spacing: -.055em; }
+    .dialog-close {
+      display: grid; place-items: center; flex: 0 0 auto; width: 40px; height: 40px; border: 1px solid var(--line);
+      border-radius: 13px; background: #fff; color: var(--ink); font-size: 23px;
+    }
+    .timer-dialog-main { display: grid; flex: 1; place-content: center; justify-items: center; padding: 20px 0; text-align: center; }
+    .dialog-mode {
+      display: inline-flex; align-items: center; gap: 9px; padding: 7px 11px; border-radius: 99px; background: #e5f3fd; color: #2f6790;
+      font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .dialog-mode.is-run { padding: 9px 18px 9px 12px; border: 2px solid #4d9fe0; background: #b9ddfb; color: #064879; font-size: 22px; box-shadow: 0 0 0 5px rgba(77,159,224,.13); }
+    .dialog-mode.is-walk { padding: 9px 18px 9px 12px; border: 2px solid #8bb9df; background: #e4f2ff; color: #245b8a; font-size: 22px; box-shadow: 0 0 0 5px rgba(139,185,223,.15); }
+    .dialog-activity-icon { display: none; width: 38px; height: 38px; place-items: center; font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif; font-size: 28px; line-height: 1; }
+    .dialog-mode.is-run .dialog-activity-icon, .dialog-mode.is-walk .dialog-activity-icon { display: grid; width: 44px; height: 44px; font-size: 36px; }
+    .dialog-prescription { margin-top: 15px; color: #536157; font-size: 14px; font-weight: 750; }
+    .dialog-clock {
+      margin: 9px 0 0; font-size: clamp(72px, 15vw, 150px); line-height: .96; font-weight: 900;
+      letter-spacing: -.075em; font-variant-numeric: tabular-nums;
+    }
+    .dialog-caption { min-height: 24px; margin-top: 12px; color: var(--muted); font-size: 13px; }
+    .dialog-progress { width: min(460px, 76vw); height: 9px; margin-top: 23px; overflow: hidden; border-radius: 99px; background: #e7ece3; }
+    .dialog-progress span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--sky-dark); transition: width .2s linear; }
+    .dialog-progress.is-run span { background: #2486d1; }
+    .dialog-progress.is-walk span { background: #83b8e4; }
+    .dialog-help { max-width: 500px; margin: 13px 0 0; color: #879188; font-size: 10px; line-height: 1.5; }
+    .timer-dialog-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 9px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .dialog-button { min-height: 43px; padding: 0 17px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font-size: 12px; font-weight: 850; }
+    .dialog-button.primary { border-color: var(--ink); background: var(--ink); color: #fff; }
+    .dialog-button.warning { border-color: #f2d1bd; background: #fff4ed; color: #a74d20; }
+    .dialog-button[hidden] { display: none; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 1000px) {
+      .hero { grid-template-columns: 1fr 300px; gap: 20px; }
+      .layout { grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); }
+      .schedule-grid { padding-inline: 16px; }
+      .panel-head { padding-inline: 16px; }
+      .exercise-list { padding-inline: 11px; }
+      .timer-toolbar { padding-inline: 16px; }
+    }
+    @media (max-width: 790px) {
+      .shell { padding: 0 18px 38px; }
+      .hero { grid-template-columns: 1fr; padding-top: 30px; }
+      .hero-card { min-height: 175px; }
+      .layout { grid-template-columns: 1fr; }
+      .right-column { grid-row: 1; grid-template-columns: 1fr 1fr; align-items: start; }
+      .run-panel { grid-column: 1 / -1; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 570px) {
+      .shell { padding: 0 12px 32px; }
+      .topbar { min-height: 68px; height: auto; padding: 10px 0; gap: 8px; }
+      .brand-mark { width: 35px; height: 35px; }
+      .top-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+      .quiet-button { min-height: 44px; padding: 0 10px; font-size: 11px; }
+      .hero { gap: 20px; padding: 25px 0 22px; }
+      h1 { font-size: 43px; }
+      .hero-copy { font-size: 13px; }
+      .tag { min-height: 36px; font-size: 11px; }
+      .stats { gap: 8px; margin-bottom: 14px; }
+      .stat { min-height: 88px; padding: 12px; }
+      .stat-label { font-size: 8px; }
+      .stat-value { font-size: 21px; }
+      .layout { gap: 13px; }
+      .panel { border-radius: 18px; }
+      .panel-head { padding: 16px 13px 12px; }
+      .panel-title { font-size: 17px; }
+      .schedule-grid { grid-template-columns: 1fr; gap: 8px; padding: 0 12px 13px; }
+      .schedule-head { flex-wrap: wrap; }
+      .schedule-head .week-controls { width: 100%; justify-content: space-between; }
+      .schedule-head .week-select { flex: 1; }
+      .schedule-card { padding: 14px; }
+      .schedule-name { margin-top: 10px; font-size: 14px; }
+      .schedule-date { font-size: 12px; }
+      .schedule-run { margin-top: 10px; padding-top: 9px; }
+      .schedule-run strong { font-size: 15px; }
+      .schedule-run span { font-size: 11px; }
+      .schedule-bottom { margin-top: 9px; }
+      .open-session { min-height: 44px; padding: 0 8px; font-size: 11px; }
+      .week-controls { gap: 6px; }
+      .week-arrow { width: 44px; height: 44px; font-size: 22px; }
+      .week-select { height: 44px; min-width: 116px; padding: 0 10px; font-size: 13px; }
+      .week-footer { padding: 11px 13px; }
+      .workout-panel { margin-top: 13px; }
+      .workout-heading { font-size: 17px; }
+      .workout-panel > .panel-head { flex-direction: column; align-items: stretch; gap: 12px; }
+      .workout-actions, .complete-button { width: 100%; }
+      .complete-button { min-height: 52px; padding-inline: 14px; font-size: 13px; }
+      .exercise-list { padding: 0 10px 12px; }
+      .timer-toolbar { grid-template-columns: 1fr; gap: 7px; padding: 0 12px 12px; }
+      .timer-box { min-height: 68px; padding: 12px; }
+      .timer-number { font-size: 23px; }
+      .timer-action { min-height: 48px; padding: 0 12px; font-size: 12px; flex: 1 1 130px; }
+      .timer-actions .timer-action { flex: 0 0 auto; }
+      .exercise-row { grid-template-columns: 48px minmax(0,1fr); gap: 7px; padding: 14px 3px; }
+      .exercise-check { width: 48px; height: 48px; }
+      .exercise-check input { width: 34px; height: 34px; }
+      .exercise-name { font-size: 13px; }
+      .exercise-prescription { font-size: 11px; }
+      .exercise-description { font-size: 11px; line-height: 1.5; }
+      .exercise-rest { font-size: 10px; }
+      .exercise-timers { gap: 7px; margin-top: 10px; }
+      .exercise-fields { grid-column: 2; }
+      .input-group { max-width: 100%; }
+      .input-group { gap: 6px; }
+      .input-group label { font-size: 9px; }
+      .input-group input { height: 46px; padding: 0 12px; font-size: 16px; }
+      .run-fields { gap: 8px; }
+      .right-column { grid-template-columns: 1fr; }
+      .run-panel { grid-column: auto; }
+      .goal-panel { padding: 16px; }
+      .start-setting { grid-template-columns: minmax(0, 1fr) 135px; gap: 9px; padding-inline: 14px; }
+      .start-setting input { height: 44px; font-size: 14px; }
+      .run-focus { margin-inline: 14px; }
+      .pace-note { margin-inline: 14px; font-size: 11px; }
+      .pace-table { width: calc(100% - 28px); margin-inline: 14px; font-size: 11px; }
+      .pace-table th { font-size: 9px; }
+      .timer-dialog { width: calc(100vw - 18px); height: 88vh; max-height: 88vh; border-radius: 22px; }
+      .timer-dialog-inner { padding: 20px 16px; }
+      .dialog-clock { font-size: clamp(66px, 18vw, 110px); }
+      .dialog-caption { font-size: 11px; }
+      .dialog-mode.is-run { padding: 8px 14px 8px 10px; font-size: 19px; }
+      .dialog-mode.is-walk { padding: 8px 14px 8px 10px; font-size: 19px; }
+      .dialog-activity-icon { width: 32px; height: 32px; font-size: 25px; }
+      .dialog-mode.is-run .dialog-activity-icon, .dialog-mode.is-walk .dialog-activity-icon { width: 38px; height: 38px; font-size: 32px; }
+      .dialog-button { min-height: 50px; flex: 1 1 100%; font-size: 13px; }
+      .timer-dialog-actions { gap: 8px; padding-top: 14px; }
+    }
+    @media (max-width: 400px) {
+      .topbar { flex-wrap: wrap; align-items: flex-start; }
+      .top-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+      .quiet-button { width: 100%; font-size: 12px; }
+      .run-fields { grid-template-columns: 1fr; }
+      .dialog-close { width: 44px; height: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="GRIT, inizio">
+        <span class="brand-mark">G.</span>
+        <span><span class="brand-name">GRIT</span><span class="brand-sub">TRAINING SYSTEM</span></span>
+      </a>
+      <div class="top-actions">
+        <button class="quiet-button" id="exportButton" type="button">Esporta backup</button>
+        <button class="quiet-button" id="importButton" type="button">Importa backup</button>
+        <button class="quiet-button" id="resetButton" type="button">Azzera dati</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="pageTitle">
+      <div>
+        <div class="eyebrow">Il tuo percorso · 24 settimane</div>
+        <h1 id="pageTitle">Allenati con <span>metodo.</span></h1>
+        <p class="hero-copy">Tre sedute, progressione chiara e ogni allenamento sotto controllo. Segna il lavoro fatto, registra i carichi e costruisci la tua costanza settimana dopo settimana.</p>
+        <div class="hero-tags">
+          <span class="tag"><i class="tag-dot"></i> 3 sedute · dom / mar / gio</span>
+          <span class="tag">Home gym · 90 min max</span>
+          <span class="tag">Obiettivo: 5 km sotto i 30′</span>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-top">
+          <div>
+            <div class="hero-card-label">Il tuo focus</div>
+            <div class="hero-week" id="heroWeek">Settimana 1</div>
+            <div class="hero-date" id="heroDates">—</div>
+          </div>
+          <div class="ring" id="progressRing" aria-label="Progresso totale"><strong id="ringValue">0%</strong></div>
+        </div>
+        <div class="hero-card-bottom">
+          <div><strong id="heroCompleted">0 sedute completate</strong><span>su 72 nel programma</span></div>
+          <div class="sky-text" id="weekFocus">Primo passo →</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Riepilogo">
+      <article class="stat"><div class="stat-label">Completamento <span>↗</span></div><div class="stat-value" id="statProgress">0%</div><div class="stat-foot" id="statCompleted">0 di 72 sedute</div></article>
+      <article class="stat"><div class="stat-label">Questa settimana <span>◷</span></div><div class="stat-value" id="statWeek">0 / 3</div><div class="stat-foot">sedute registrate</div></article>
+      <article class="stat"><div class="stat-label">Distanza prevista <span>⌁</span></div><div class="stat-value" id="statKm">4,8 km</div><div class="stat-foot">corsa totale della settimana</div></article>
+      <article class="stat"><div class="stat-label">Prossima seduta <span>→</span></div><div class="stat-value" id="statNext">A · lun</div><div class="stat-foot" id="statNextDate">—</div></article>
+    </section>
+
+    <main class="layout">
+      <div class="left-column">
+        <section class="panel" aria-labelledby="scheduleTitle">
+          <div class="panel-head schedule-head">
+            <div>
+              <h2 class="panel-title" id="scheduleTitle">La tua settimana</h2>
+              <p class="panel-subtitle">Un piano sostenibile, una sessione alla volta.</p>
+            </div>
+            <div class="week-controls">
+              <button class="week-arrow" id="prevWeek" type="button" aria-label="Settimana precedente">‹</button>
+              <label class="sr-only" for="weekSelect">Seleziona settimana</label>
+              <select class="week-select" id="weekSelect"></select>
+              <button class="week-arrow" id="nextWeek" type="button" aria-label="Settimana successiva">›</button>
+            </div>
+          </div>
+          <div class="schedule-grid" id="scheduleGrid"></div>
+          <div class="week-footer">
+            <span id="weekDistance">Distanza totale: <strong>4,8 km</strong></span>
+            <span id="deloadBadge" class="deload" hidden>SETTIMANA DI SCARICO</span>
+          </div>
+        </section>
+
+        <section class="panel workout-panel" aria-labelledby="workoutHeading">
+          <div class="panel-head">
+            <div class="workout-title-wrap">
+              <div class="workout-kicker" id="workoutKicker">Seduta A · domenica</div>
+              <h2 class="workout-heading" id="workoutHeading">Spinta e corsa</h2>
+              <div class="workout-meta" id="workoutMeta">—</div>
+            </div>
+            <div class="workout-actions">
+              <button class="complete-button" id="completeButton" type="button">Segna seduta completa</button>
+            </div>
+          </div>
+          <div class="timer-toolbar" aria-label="Timer della seduta">
+            <div class="timer-box">
+              <div class="timer-copy"><span class="timer-label">Tempo allenamento</span><strong class="timer-number" id="sessionClock">00:00</strong><span class="timer-caption">Cronometro della sessione</span></div>
+              <div class="timer-actions"><button class="timer-action primary" id="sessionTimerButton" type="button">Avvia</button><button class="timer-action" id="resetSessionTimer" type="button">Azzera</button></div>
+            </div>
+            <div class="timer-box">
+              <div class="timer-copy"><span class="timer-label" id="activeTimerLabel">Timer esercizio</span><strong class="timer-number" id="exerciseClock">00:00</strong><span class="timer-caption" id="exerciseTimerCaption">Serie, recuperi o intervalli</span></div>
+              <div class="timer-actions"><button class="timer-action primary" id="openTimerDialog" type="button" hidden>Apri timer</button><button class="timer-action" id="stopExerciseTimer" type="button" hidden>Ferma</button></div>
+            </div>
+          </div>
+          <div class="exercise-list" id="exerciseList"></div>
+        </section>
+      </div>
+
+      <aside class="right-column">
+        <section class="panel run-panel" aria-labelledby="runPanelTitle">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title" id="runPanelTitle">Progressione corsa</h2>
+              <p class="panel-subtitle" id="runPanelSubtitle">Settimana 1 · dati della scheda selezionata.</p>
+            </div>
+          </div>
+          <div class="run-summary">
+            <div class="run-summary-top">
+              <div><div class="run-summary-label">Ritmo corsa</div><div class="run-pace" id="runPace">10:00 /km</div><div class="run-walk">Cammino sempre a 12:00 /km</div></div>
+              <div class="run-distance" id="weekTotalKm">4,8 km</div>
+            </div>
+            <div class="distance-bars">
+              <div class="distance-item"><span>SEDUTA A · DOM</span><strong id="distanceA">1,8 km</strong></div>
+              <div class="distance-item"><span>SEDUTA B · MAR</span><strong id="distanceB">1,5 km</strong></div>
+              <div class="distance-item"><span>SEDUTA C · GIO</span><strong id="distanceC">1,5 km</strong></div>
+            </div>
+          </div>
+          <div class="run-focus">
+            <div class="run-focus-label" id="runFocusLabel">Seduta A · Domenica</div>
+            <div class="run-focus-main"><strong id="runFocusDistance">1,8 km</strong><span id="runFocusDuration">20:24 corsa/cammino</span></div>
+            <div class="run-focus-pattern" id="runFocusPattern">—</div>
+          </div>
+          <p class="pace-note" id="paceNote">Ripeti la fase se non completi tutte le corse senza dolore. Nelle settimane di scarico non aumentare i carichi.</p>
+          <table class="pace-table" aria-label="Fasi della progressione di corsa">
+            <thead><tr><th>Settimane</th><th>Ritmo corsa</th><th>Split 400 m</th></tr></thead>
+            <tbody id="paceTable"></tbody>
+          </table>
+          <div class="start-setting">
+            <div><strong>Inizio del programma</strong><span>Imposta la domenica della settimana 1</span></div>
+            <input id="startDate" type="date" aria-label="Data iniziale del programma">
+          </div>
+        </section>
+
+        <section class="panel goal-panel" aria-labelledby="goalTitle">
+          <div class="goal-heading"><h3 id="goalTitle">Tre obiettivi. Un percorso.</h3><span>24 settimane</span></div>
+          <div class="goal-row"><div class="goal-icon">↑</div><div class="goal-info"><strong>Trazioni</strong><span>Da 0 · forza e controllo</span></div><div class="goal-target">10</div></div>
+          <div class="goal-row"><div class="goal-icon">↗</div><div class="goal-info"><strong>Piegamenti</strong><span>Una serie continua</span></div><div class="goal-target">40</div></div>
+          <div class="goal-row"><div class="goal-icon">⌁</div><div class="goal-info"><strong>Corsa</strong><span>Ritmo obiettivo 6:00/km</span></div><div class="goal-target">5 km</div></div>
+          <div class="save-note"><i class="save-dot"></i><span>I tuoi progressi e carichi vengono salvati in questo browser. Esporta un backup per conservarne una copia o importalo per ripristinarla.</span></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+  <dialog class="timer-dialog" id="timerDialog" aria-labelledby="dialogExerciseName">
+    <div class="timer-dialog-inner">
+      <div class="timer-dialog-head">
+        <div>
+          <div class="dialog-eyebrow" id="dialogEyebrow">Seduta · timer attivo</div>
+          <h2 class="dialog-exercise" id="dialogExerciseName">Esercizio</h2>
+        </div>
+        <button class="dialog-close" id="closeTimerDialog" type="button" aria-label="Riduci timer">×</button>
+      </div>
+      <div class="timer-dialog-main">
+        <span class="dialog-mode" id="dialogMode"><span class="dialog-activity-icon" id="dialogActivityIcon" aria-hidden="true"></span><span id="dialogModeLabel">Serie</span></span>
+        <div class="dialog-prescription" id="dialogPrescription">Ripetizioni secondo la scheda</div>
+        <div class="dialog-clock" id="dialogClock">00:00</div>
+        <div class="dialog-caption" id="dialogCaption">Timer in corso</div>
+        <div class="dialog-progress"><span id="dialogProgress"></span></div>
+        <p class="dialog-help" id="dialogHelp">Il cronometro misura la durata della serie; il piano non impone un tempo fisso per ogni ripetizione.</p>
+      </div>
+      <div class="timer-dialog-actions">
+        <button class="dialog-button" id="pauseExerciseTimer" type="button">Pausa timer</button>
+        <button class="dialog-button primary" id="finishDialogSet" type="button" hidden>Fine serie + recupero</button>
+        <button class="dialog-button warning" id="stopDialogTimer" type="button">Ferma timer</button>
+      </div>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    const STORE_KEY = "grit-training-plan-v1";
+    const weekDistances = [
+      [1.5, 1.5, 1.8], [1.5, 1.5, 2.0], [1.8, 1.8, 2.2], [1.5, 1.5, 1.8],
+      [1.8, 1.8, 2.2], [2.0, 2.0, 2.5], [2.0, 2.0, 2.5], [1.8, 1.8, 2.0],
+      [2.0, 2.0, 2.5], [2.2, 2.2, 2.7], [2.5, 2.5, 3.0], [2.0, 2.0, 2.5],
+      [2.5, 2.5, 3.0], [2.8, 2.8, 3.2], [3.0, 3.0, 3.5], [2.5, 2.5, 3.0],
+      [3.0, 3.0, 3.5], [3.2, 3.2, 4.0], [3.5, 3.5, 4.2], [3.0, 3.0, 3.5],
+      [3.5, 3.0, 4.5], [3.5, 3.0, 4.5], [3.5, 3.0, 5.0], [3.0, 2.2, 5.0]
+    ];
+    const deloadWeeks = new Set([4, 8, 12, 16, 20]);
+    const pacePhases = [
+      { from: 1, to: 4, pace: 600, label: "10:00" },
+      { from: 5, to: 8, pace: 570, label: "9:30" },
+      { from: 9, to: 12, pace: 540, label: "9:00" },
+      { from: 13, to: 16, pace: 510, label: "8:30" },
+      { from: 17, to: 18, pace: 480, label: "8:00" },
+      { from: 19, to: 20, pace: 450, label: "7:30" },
+      { from: 21, to: 22, pace: 420, label: "7:00" },
+      { from: 23, to: 23, pace: 390, label: "6:30" },
+      { from: 24, to: 24, pace: 360, label: "6:00" }
+    ];
+    const acPatterns = {
+      "1.5": { rounds: 5, run: 100, walk: 200 },
+      "1.8": { rounds: 6, run: 100, walk: 200 },
+      "2.0": { rounds: 5, run: 200, walk: 200 },
+      "2.2": { rounds: 5, run: 200, walk: 200, extraWalk: 200 },
+      "2.5": { rounds: 5, run: 300, walk: 200 },
+      "2.7": { rounds: 5, run: 300, walk: 200, extraWalk: 200 },
+      "2.8": { rounds: 6, run: 300, walk: 100, extraWalk: 400 },
+      "3.0": { rounds: 6, run: 400, walk: 100 },
+      "3.2": { rounds: 6, run: 400, walk: 100, extraWalk: 200 },
+      "3.5": { rounds: 7, run: 400, walk: 100 },
+      "4.0": { rounds: 8, run: 400, walk: 100 },
+      "4.2": { rounds: 8, run: 400, walk: 100, extraWalk: 200 },
+      "4.5": { rounds: 9, run: 400, walk: 100 },
+      "5.0": { rounds: 10, run: 400, walk: 100 }
+    };
+    const bPatterns = [
+      { rounds: 5, run: 100, walk: 100, extraWalk: 500 },
+      { rounds: 5, run: 100, walk: 100, extraWalk: 500 },
+      { rounds: 6, run: 100, walk: 100, extraWalk: 600 },
+      { rounds: 5, run: 100, walk: 100, extraWalk: 500 },
+      { rounds: 6, run: 100, walk: 100, extraWalk: 600 },
+      { rounds: 5, run: 200, walk: 100, extraWalk: 500 },
+      { rounds: 6, run: 200, walk: 100, extraWalk: 200 },
+      { rounds: 6, run: 100, walk: 100, extraWalk: 600 },
+      { rounds: 5, run: 200, walk: 200 },
+      { rounds: 5, run: 200, walk: 200, extraWalk: 200 },
+      { rounds: 5, run: 300, walk: 200 },
+      { rounds: 5, run: 200, walk: 200 },
+      { rounds: 5, run: 300, walk: 200 },
+      { rounds: 6, run: 300, walk: 100, extraWalk: 400 },
+      { rounds: 6, run: 300, walk: 200 },
+      { rounds: 5, run: 300, walk: 200 },
+      { rounds: 6, run: 400, walk: 100 },
+      { rounds: 6, run: 400, walk: 100, extraWalk: 200 },
+      { rounds: 7, run: 400, walk: 100 },
+      { rounds: 6, run: 400, walk: 100 }
+    ];
+    const sessions = {
+      A: {
+        day: "Martedì", shortDay: "MAR", name: "Spinta e corsa", range: [41, 52],
+        exercises: [
+          { id: "warmup", name: "Riscaldamento", prescription: "5 min", description: "Mobilità dinamica e movimenti leggeri; prepara spalle, gomiti e polsi.", kind: "check" },
+          { id: "pushups", name: "Piegamenti sulle braccia", prescription: "4×6–8", rest: "90 sec", description: "Corpo in linea e addome attivo. Inclina le mani sulla panca se serve. Ferma la serie prima che la tecnica ceda.", kind: "load", placeholder: "Variante / nota" },
+          { id: "bench", name: "Bilanciere panca piana", prescription: "3×8–12", rest: "120 sec", description: "Scendi con controllo, gomiti non troppo aperti; spingi senza urtare i manubri.", kind: "load", placeholder: "kg totali" },
+          { id: "shoulderPress", name: "Distensioni sopra la testa con manubri", prescription: "3×8–12", rest: "90 sec", description: "Da seduto o in piedi, addome contratto; evita di inarcare la schiena.", kind: "load", placeholder: "kg per manubrio" },
+          { id: "lateralRaise", name: "Alzate laterali", prescription: "2×12–20", rest: "60 sec", description: "Carico leggero, gomiti morbidi; solleva circa fino all'altezza delle spalle.", kind: "load", placeholder: "kg per manubrio" },
+          { id: "pullApart", name: "Band pull-apart", prescription: "2×15–20", rest: "45–60 sec", description: "Tieni le spalle basse e il busto fermo; interrompi se provoca fastidio.", kind: "load", placeholder: "Elastico / nota", optional: true },
+          { id: "triceps", name: "Estensioni tricipiti con elastico o manubrio", prescription: "2×10–15", rest: "60 sec", description: "Mantieni fermi i gomiti e controlla la spinta e il ritorno.", kind: "load", placeholder: "kg / elastico" },
+          { id: "transition", name: "Transizioni / acqua", prescription: "4–5 min", description: "Prepara la corsa e annota i dati della seduta.", kind: "check" },
+          { id: "run", name: "Corsa", prescription: "Distanza settimanale", description: "Segui i blocchi corsa/cammino indicati per questa settimana.", kind: "run" },
+          { id: "cooldown", name: "Defaticamento", prescription: "4–5 min", description: "Cammina lentamente e lascia scendere gradualmente il respiro.", kind: "check" }
+        ]
+      },
+      B: {
+        day: "Giovedì", shortDay: "GIO", name: "Gambe, addominali e intervalli", range: [42, 50],
+        exercises: [
+          { id: "warmup", name: "Riscaldamento", prescription: "5 min", description: "Mobilità dinamica di anche e caviglie; poi squat e hip hinge a corpo libero.", kind: "check" },
+          { id: "run", name: "Intervalli corsa/cammino", prescription: "Distanza settimanale", description: "Segui riscaldamento, ripetute, recuperi camminati e defaticamento indicati per la settimana.", kind: "run" },
+          { id: "gluteBridge", name: "Ponte glutei con peso", prescription: "2×10–15", rest: "60–90 sec", description: "Spingi dai talloni e contrai i glutei in alto senza inarcare la schiena.", kind: "load", placeholder: "kg / variante" },
+          { id: "core", name: "Dead bug + plank laterale", prescription: "2 giri · 8–10 per lato + 20–30 sec per lato", rest: "30 sec tra esercizi", description: "Nel dead bug mantieni stabile la zona lombare; nel plank laterale mantieni il corpo allineato.", kind: "load", placeholder: "Variante / nota" },
+          { id: "goblet", name: "Squat goblet con manubrio", prescription: "3×8–12", rest: "120 sec", description: "Tieni il manubrio al petto; scendi fin dove mantieni equilibrio e controllo.", kind: "load", placeholder: "kg manubrio" },
+          { id: "rdl", name: "Stacco rumeno con bilanciere", prescription: "3×8–12", rest: "120 sec", description: "Spingi indietro le anche e tieni il bilanciere vicino alle gambe; fermati quando senti tensione nei posteriori coscia.", kind: "load", placeholder: "kg totali" },
+          { id: "lunges", name: "Affondi indietro con manubri", prescription: "2×8–10 per gamba", rest: "90 sec", description: "Passo indietro controllato; usa il peso corporeo se perdi equilibrio.", kind: "load", placeholder: "kg per manubrio" },
+          { id: "calves", name: "Calf raise in piedi con manubri", prescription: "2×15–20", rest: "60 sec", description: "Sali e scendi in modo controllato; interrompi se senti fastidio ai polpacci o ai tendini.", kind: "load", placeholder: "kg / variante", optional: true },
+          { id: "cooldown", name: "Transizioni / defaticamento", prescription: "4–5 min", description: "Cammina lentamente e lascia scendere gradualmente il respiro.", kind: "check" }
+        ]
+      },
+      C: {
+        day: "Domenica", shortDay: "DOM", name: "Schiena, panca romana e corsa", range: [36, 41],
+        exercises: [
+          { id: "warmup", name: "Riscaldamento", prescription: "5 min", description: "Mobilità di spalle e torace. Sospensioni brevi alla barra solo se confortevoli.", kind: "check" },
+          { id: "pullups", name: "Trazioni assistite", prescription: "4×4–8", rest: "2–3 min", description: "Usa elastico o appoggio dei piedi su supporto stabile; niente slanci. Registra quanta assistenza usi.", kind: "load", placeholder: "Assistenza / variante" },
+          { id: "scapular", name: "Depressioni scapolari alla sbarra, piedi in appoggio", prescription: "2×5–8", rest: "60–90 sec", description: "A braccia distese, abbassa le scapole senza piegare i gomiti; usa i piedi per aiutarti e non fare slanci. Salta se la sbarra è occupata o senti fastidio.", kind: "load", placeholder: "Assistenza / nota", optional: true },
+          { id: "row", name: "Rematore con un manubrio, appoggiato alla panca", prescription: "3×8–12 per lato", rest: "90 sec", description: "Schiena neutra e busto sostenuto; tira il gomito verso l'anca senza ruotare il tronco.", kind: "load", placeholder: "kg manubrio" },
+          { id: "roman", name: "Estensioni alla panca romana", prescription: "2×10–12 a corpo libero", rest: "90 sec", description: "Muovi le anche mantenendo la schiena neutra; termina con busto in linea con le gambe.", kind: "bodyweight" },
+          { id: "facePull", name: "Face pull con elastico", prescription: "2×12–20", rest: "60 sec", description: "Tira l'elastico verso il viso con gomiti aperti; fissalo solo a un punto sicuro.", kind: "load", placeholder: "Elastico / nota" },
+          { id: "curl", name: "Curl con manubri", prescription: "2×10–15", rest: "60 sec", description: "Gomiti vicini ai fianchi; evita slanci del busto.", kind: "load", placeholder: "kg per manubrio" },
+          { id: "easyPushups", name: "Piegamenti facili", prescription: "2 serie · 3–4 ripetizioni in riserva", rest: "60–90 sec", description: "Variante inclinata se serve; pratica leggera, senza cedimento.", kind: "load", placeholder: "Variante / nota" },
+          { id: "transition", name: "Transizioni", prescription: "2–3 min", description: "Prepara la corsa.", kind: "check" },
+          { id: "run", name: "Corsa più lunga", prescription: "Distanza settimanale", description: "Completa la distanza alternando corsa e cammino secondo i blocchi della settimana.", kind: "run" },
+          { id: "cooldown", name: "Defaticamento", prescription: "4 min", description: "Camminata lenta e respirazione tranquilla.", kind: "check" }
+        ]
+      }
+    };
+    const DEFAULT_START_DATE = "2026-11-15";
+    const sessionOrder = { A: "C", B: "A", C: "B" };
+    const distanceIndex = { A: 2, B: 0, C: 1 };
+
+    function sundayString(date) {
+      const sunday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      sunday.setDate(sunday.getDate() + ((7 - sunday.getDay()) % 7));
+      return dateToInput(sunday);
+    }
+    function dateToInput(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+    function alignToSunday(value) {
+      const date = new Date(`${value}T12:00:00`);
+      date.setDate(date.getDate() + ((7 - date.getDay()) % 7));
+      return dateToInput(date);
+    }
+    function defaultWeek(startDate) {
+      const start = new Date(`${startDate}T12:00:00`);
+      const today = new Date();
+      const days = Math.floor((new Date(today.getFullYear(), today.getMonth(), today.getDate()) - new Date(start.getFullYear(), start.getMonth(), start.getDate())) / 86400000);
+      return Math.max(1, Math.min(24, Math.floor(days / 7) + 1));
+    }
+    function remapLogs(logs, renamed) {
+      return Object.fromEntries(Object.entries(logs || {}).map(([key, value]) => {
+        const match = /^(\d+)-([ABC])$/.exec(key);
+        return match ? [`${match[1]}-${renamed[match[2]]}`, value] : [key, value];
+      }));
+    }
+    function normalizeBackupState(saved) {
+      if (!saved || typeof saved !== "object" || Array.isArray(saved)) throw new Error("Il file selezionato non è un backup valido.");
+      if (![2, 3, 4].includes(saved.schemaVersion)) throw new Error("Versione del backup non supportata.");
+      if (!saved.logs || typeof saved.logs !== "object" || Array.isArray(saved.logs)) throw new Error("Il backup non contiene un registro dei progressi valido.");
+      if (!Number.isInteger(saved.week) || saved.week < 1 || saved.week > 24) throw new Error("La settimana salvata nel backup non è valida.");
+      if (saved.schemaVersion >= 3) {
+        const date = typeof saved.startDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(saved.startDate)
+          ? new Date(`${saved.startDate}T12:00:00`)
+          : null;
+        if (!date || Number.isNaN(date.getTime()) || dateToInput(date) !== saved.startDate) {
+          throw new Error("La data iniziale salvata nel backup non è valida.");
+        }
+      }
+
+      let restoredLogs = saved.logs;
+      if (saved.schemaVersion === 2) restoredLogs = remapLogs(restoredLogs, { A: "C", B: "A", C: "B" });
+      if (saved.schemaVersion !== 4) restoredLogs = remapLogs(restoredLogs, { A: "B", B: "C", C: "A" });
+      const logs = {};
+      for (const [key, log] of Object.entries(restoredLogs)) {
+        if (!/^(?:[1-9]|1\d|2[0-4])-[ABC]$/.test(key) || !log || typeof log !== "object" || Array.isArray(log) ||
+            !log.exercises || typeof log.exercises !== "object" || Array.isArray(log.exercises)) {
+          throw new Error("Il backup contiene una seduta in un formato non valido.");
+        }
+        if (log.completed !== undefined && typeof log.completed !== "boolean") throw new Error("Il backup contiene uno stato di seduta non valido.");
+        const exercises = {};
+        for (const [id, exercise] of Object.entries(log.exercises)) {
+          if (!exercise || typeof exercise !== "object" || Array.isArray(exercise)) throw new Error("Il backup contiene dati esercizio non validi.");
+          for (const field of ["done", "value", "distance", "time"]) {
+            if (exercise[field] !== undefined && typeof exercise[field] !== (field === "done" ? "boolean" : "string")) {
+              throw new Error("Il backup contiene dati esercizio non validi.");
+            }
+          }
+          const setsDone = exercise.setsDone ?? 0;
+          if (!Number.isInteger(setsDone) || setsDone < 0) throw new Error("Il backup contiene un conteggio serie non valido.");
+          exercises[id] = {
+            done: exercise.done ?? false,
+            value: exercise.value ?? "",
+            distance: exercise.distance ?? "",
+            time: exercise.time ?? "",
+            setsDone
+          };
+        }
+        logs[key] = { completed: log.completed ?? false, exercises };
+      }
+      return {
+        schemaVersion: 4,
+        startDate: saved.schemaVersion >= 3 ? alignToSunday(saved.startDate) : DEFAULT_START_DATE,
+        week: saved.week,
+        logs
+      };
+    }
+    function loadState() {
+      const startDate = DEFAULT_START_DATE;
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+        if (saved && typeof saved === "object") {
+          const logs = saved.logs && typeof saved.logs === "object" ? saved.logs : {};
+          let restoredLogs = logs;
+          if (saved.schemaVersion === 2) restoredLogs = remapLogs(restoredLogs, { A: "C", B: "A", C: "B" });
+          if (saved.schemaVersion !== 4) restoredLogs = remapLogs(restoredLogs, { A: "B", B: "C", C: "A" });
+          return {
+            schemaVersion: 4,
+            startDate: saved.schemaVersion >= 3 && /^\d{4}-\d{2}-\d{2}$/.test(saved.startDate || "") ? alignToSunday(saved.startDate) : startDate,
+            week: Math.max(1, Math.min(24, Number(saved.week) || 1)),
+            logs: restoredLogs
+          };
+        }
+      } catch (error) {
+        console.error("Impossibile leggere i progressi salvati.", error);
+        window.setTimeout(() => showToast("Non riesco a leggere il salvataggio locale. Puoi iniziare una nuova registrazione."), 0);
+      }
+      return { schemaVersion: 4, startDate, week: defaultWeek(startDate), logs: {} };
+    }
+    let appState = loadState();
+    let activeSession = "A";
+    let toastTimer;
+    let timerScope = null;
+    let sessionTimer = { running: false, elapsedMs: 0, startedAt: null };
+    let exerciseTimer = null;
+    let timerInterval = null;
+    let timerAudioContext = null;
+    let audioWarningShown = false;
+
+    function persist() {
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(appState));
+      } catch (error) {
+        console.error("Impossibile salvare i progressi.", error);
+        showToast("Salvataggio non riuscito: controlla lo spazio disponibile nel browser.");
+      }
+    }
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast.classList.remove("show"), 3300);
+    }
+    function prepareTimerAudio() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        if (!audioWarningShown) showToast("Questo browser non supporta il suono del timer.");
+        audioWarningShown = true;
+        return;
+      }
+      try {
+        if (!timerAudioContext) timerAudioContext = new AudioContextClass();
+        if (timerAudioContext.state === "suspended") {
+          timerAudioContext.resume().catch(error => {
+            console.error("Impossibile attivare l'audio del timer.", error);
+            if (!audioWarningShown) showToast("Audio bloccato dal browser: abilita l'audio per sentire il timer.");
+            audioWarningShown = true;
+          });
+        }
+      } catch (error) {
+        console.error("Impossibile inizializzare l'audio del timer.", error);
+        if (!audioWarningShown) showToast("Non riesco ad attivare il suono del timer.");
+        audioWarningShown = true;
+      }
+    }
+    function playTimerSound(finalCue = true) {
+      if (!timerAudioContext || timerAudioContext.state !== "running") {
+        if (!audioWarningShown) showToast("Audio non disponibile: il timer è terminato senza suono.");
+        audioWarningShown = true;
+        return;
+      }
+      try {
+        const now = timerAudioContext.currentTime;
+        const notes = finalCue ? [880, 660, 880] : [740];
+        notes.forEach((frequency, index) => {
+          const start = now + index * 0.18;
+          const oscillator = timerAudioContext.createOscillator();
+          const gain = timerAudioContext.createGain();
+          oscillator.type = "sine";
+          oscillator.frequency.setValueAtTime(frequency, start);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(0.18, start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+          oscillator.connect(gain);
+          gain.connect(timerAudioContext.destination);
+          oscillator.start(start);
+          oscillator.stop(start + 0.17);
+        });
+      } catch (error) {
+        console.error("Impossibile riprodurre il suono del timer.", error);
+        if (!audioWarningShown) showToast("Non riesco a riprodurre il suono del timer.");
+        audioWarningShown = true;
+      }
+    }
+    function formatClock(seconds) {
+      const wholeSeconds = Math.max(0, Math.floor(seconds));
+      const hours = Math.floor(wholeSeconds / 3600);
+      const minutes = Math.floor((wholeSeconds % 3600) / 60);
+      const remainder = wholeSeconds % 60;
+      return hours ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}` : `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+    }
+    function secondsFromText(text) {
+      const match = String(text || "").match(/(\d+)\s*(?:[–-]\s*(\d+)\s*)?(sec|min)/i);
+      if (!match) return null;
+      const factor = match[3].toLowerCase() === "min" ? 60 : 1;
+      const first = Number(match[1]) * factor;
+      const second = match[2] ? Number(match[2]) * factor : first;
+      return Math.round((first + second) / 2);
+    }
+    function plannedSets(exercise) {
+      const match = String(exercise.prescription).match(/^(\d+)/);
+      return match ? Number(match[1]) : 1;
+    }
+    function startSessionClock() {
+      if (sessionTimer.running) return;
+      sessionTimer.running = true;
+      sessionTimer.startedAt = Date.now();
+      updateTimerDisplay();
+    }
+    function stopExerciseClock(message) {
+      exerciseTimer = null;
+      const dialog = document.getElementById("timerDialog");
+      if (dialog.open) dialog.close();
+      updateTimerDisplay();
+      if (message) showToast(message);
+    }
+    function startCountdown(mode, exercise, seconds) {
+      if (!sessionTimer.running) startSessionClock();
+      prepareTimerAudio();
+      exerciseTimer = { mode, exerciseId: exercise.id, startedAt: Date.now(), durationMs: seconds * 1000 };
+      openTimerDialog();
+      updateTimerDisplay();
+    }
+    function startSetTimer(week, session, exercise) {
+      if (!sessionTimer.running) startSessionClock();
+      exerciseTimer = { mode: "set", exerciseId: exercise.id, startedAt: Date.now() };
+      openTimerDialog();
+      updateTimerDisplay();
+    }
+    function startIntervalTimer(week, session) {
+      if (!sessionTimer.running) startSessionClock();
+      prepareTimerAudio();
+      const segments = runPattern(week, session).segments;
+      exerciseTimer = { mode: "interval", exerciseId: "run", segments, segmentIndex: 0, segmentStartedAt: Date.now() };
+      openTimerDialog();
+      updateTimerDisplay();
+    }
+    function openTimerDialog() {
+      const dialog = document.getElementById("timerDialog");
+      if (!dialog.open) dialog.showModal();
+      updateTimerDisplay();
+    }
+    function pauseExerciseClock() {
+      if (!exerciseTimer) return;
+      const now = Date.now();
+      if (!exerciseTimer.paused) {
+        exerciseTimer.paused = true;
+        exerciseTimer.pausedAt = now;
+      } else {
+        const pausedFor = now - exerciseTimer.pausedAt;
+        if (exerciseTimer.mode === "interval") exerciseTimer.segmentStartedAt += pausedFor;
+        else exerciseTimer.startedAt += pausedFor;
+        exerciseTimer.paused = false;
+        delete exerciseTimer.pausedAt;
+      }
+      updateTimerDisplay();
+    }
+    function finishSetTimer(week, session, exercise) {
+      if (exerciseTimer?.mode !== "set" || exerciseTimer.exerciseId !== exercise.id) {
+        showToast("Avvia prima il timer della serie.");
+        return;
+      }
+      const saved = getExerciseLog(week, session, exercise.id);
+      saved.setsDone = Math.min(plannedSets(exercise), (Number(saved.setsDone) || 0) + 1);
+      const restSeconds = secondsFromText(exercise.rest);
+      if (restSeconds) startCountdown("rest", exercise, restSeconds);
+      else stopExerciseClock("Serie registrata.");
+      persist();
+      renderWorkout();
+    }
+    function undoLastSet(week, session, exercise) {
+      const saved = getExerciseLog(week, session, exercise.id);
+      const setsDone = Number(saved.setsDone) || 0;
+      if (setsDone <= 0) {
+        showToast("Non ci sono serie registrate da annullare.");
+        return;
+      }
+      saved.setsDone = setsDone - 1;
+      if (exerciseTimer?.mode === "rest" && exerciseTimer.exerciseId === exercise.id) {
+        stopExerciseClock();
+      }
+      persist();
+      renderWorkout();
+      showToast("Ultima serie annullata.");
+    }
+    function updateRestTimerWarning(isWarning) {
+      document.getElementById("exerciseClock").classList.toggle("timer-warning", isWarning);
+      document.getElementById("dialogClock").classList.toggle("timer-warning", isWarning);
+    }
+    const activityIcons = {
+      run: "🏃",
+      walk: "🚶"
+    };
+    function setDialogMode(label, activityType = null) {
+      const badge = document.getElementById("dialogMode");
+      const icon = document.getElementById("dialogActivityIcon");
+      const progress = document.getElementById("dialogProgress").parentElement;
+      badge.classList.toggle("is-run", activityType === "run");
+      badge.classList.toggle("is-walk", activityType === "walk");
+      progress.classList.toggle("is-run", activityType === "run");
+      progress.classList.toggle("is-walk", activityType === "walk");
+      document.getElementById("dialogModeLabel").textContent = label;
+      if (icon.dataset.activity !== activityType) {
+        icon.textContent = activityType ? activityIcons[activityType] : "";
+        if (activityType) icon.dataset.activity = activityType;
+        else delete icon.dataset.activity;
+      }
+    }
+    function updateTimerDialog(now = Date.now()) {
+      const dialog = document.getElementById("timerDialog");
+      const openButton = document.getElementById("openTimerDialog");
+      const stopButton = document.getElementById("stopExerciseTimer");
+      const finishButton = document.getElementById("finishDialogSet");
+      const pauseButton = document.getElementById("pauseExerciseTimer");
+      const stopLabel = exerciseTimer?.mode === "set" ? "Annulla serie" : "Ferma timer";
+      stopButton.textContent = stopLabel;
+      document.getElementById("stopDialogTimer").textContent = stopLabel;
+      openButton.hidden = !exerciseTimer || dialog.open;
+      stopButton.hidden = !exerciseTimer;
+      finishButton.hidden = exerciseTimer?.mode !== "set";
+      pauseButton.hidden = !exerciseTimer;
+      if (!exerciseTimer) {
+        document.getElementById("dialogEyebrow").textContent = `Settimana ${appState.week} · seduta ${activeSession}`;
+        document.getElementById("dialogExerciseName").textContent = "Timer pronto";
+        setDialogMode("In attesa");
+        document.getElementById("dialogPrescription").textContent = "Avvia un timer dalla scheda esercizio.";
+        document.getElementById("dialogClock").textContent = "00:00";
+        document.getElementById("dialogCaption").textContent = "";
+        document.getElementById("dialogProgress").style.width = "0%";
+        return;
+      }
+      const session = activeSession;
+      const week = appState.week;
+      const exercises = sessionInfo(session).exercises;
+      const exercise = exerciseTimer.mode === "interval"
+        ? exercises.find(item => item.id === "run")
+        : exercises.find(item => item.id === exerciseTimer.exerciseId);
+      const saved = exercise ? getExerciseLog(week, session, exercise.id) : null;
+      const modeLabel = { set: "Serie in corso", rest: "Recupero", duration: "Timer esercizio", interval: "Corsa a intervalli" }[exerciseTimer.mode];
+      document.getElementById("dialogEyebrow").textContent = `Settimana ${week} · seduta ${session} · ${sessionInfo(session).day}`;
+      document.getElementById("dialogExerciseName").textContent = exercise ? exercise.name : "Timer allenamento";
+      if (exerciseTimer.mode !== "interval") setDialogMode(modeLabel);
+      document.getElementById("dialogPrescription").textContent = exerciseTimer.mode === "interval"
+        ? runPattern(week, session).text
+        : exercise ? exercise.prescription : "";
+      const helpText = {
+        set: "Cronometro della serie. Segui le ripetizioni indicate; il piano non impone un tempo fisso per ogni ripetizione.",
+        rest: "Rispetta il recupero previsto prima di iniziare la serie successiva. Un suono segnala la scadenza.",
+        duration: "Conto alla rovescia per la durata indicata nella scheda; un suono segnala la scadenza.",
+        interval: "Segui i tratti di corsa e cammino: un suono segnala ogni cambio di segmento e la fine."
+      };
+      document.getElementById("dialogHelp").textContent = helpText[exerciseTimer.mode];
+      pauseButton.textContent = exerciseTimer.paused ? "Riprendi timer" : "Pausa timer";
+      if (exerciseTimer.mode === "interval") {
+        const segment = exerciseTimer.segments[exerciseTimer.segmentIndex];
+        setDialogMode(segment.type === "run" ? "Corsa" : "Camminata", segment.type);
+        const timerNow = exerciseTimer.paused ? exerciseTimer.pausedAt : now;
+        const elapsed = timerNow - exerciseTimer.segmentStartedAt;
+        const remaining = Math.max(0, segment.seconds - elapsed / 1000);
+        document.getElementById("dialogClock").textContent = formatClock(remaining);
+        document.getElementById("dialogCaption").textContent = `${exerciseTimer.segmentIndex + 1}/${exerciseTimer.segments.length} · ${segment.type === "run" ? "corsa" : "cammino"} ${segment.meters} m · ritmo corsa ${formatPace(secondsForPace(week))}/km`;
+        document.getElementById("dialogProgress").style.width = `${Math.min(100, elapsed / (segment.seconds * 1000) * 100)}%`;
+      } else if (exerciseTimer.mode === "set") {
+        const setNumber = Math.min((Number(saved?.setsDone) || 0) + 1, plannedSets(exercise));
+        const timerNow = exerciseTimer.paused ? exerciseTimer.pausedAt : now;
+        document.getElementById("dialogClock").textContent = formatClock((timerNow - exerciseTimer.startedAt) / 1000);
+        document.getElementById("dialogCaption").textContent = `Serie ${setNumber} di ${plannedSets(exercise)} · ripetizioni secondo la prescrizione`;
+        document.getElementById("dialogProgress").style.width = `${Math.round((Number(saved?.setsDone) || 0) / plannedSets(exercise) * 100)}%`;
+      } else {
+        const timerNow = exerciseTimer.paused ? exerciseTimer.pausedAt : now;
+        const remaining = Math.max(0, exerciseTimer.durationMs - (timerNow - exerciseTimer.startedAt));
+        const elapsed = exerciseTimer.durationMs - remaining;
+        document.getElementById("dialogClock").textContent = formatClock(remaining / 1000);
+        document.getElementById("dialogCaption").textContent = exerciseTimer.mode === "rest" ? "Riposo previsto dalla scheda" : "Durata indicativa del blocco";
+        document.getElementById("dialogProgress").style.width = `${Math.min(100, elapsed / exerciseTimer.durationMs * 100)}%`;
+      }
+    }
+    function updateTimerDisplay() {
+      const now = Date.now();
+      const elapsedMs = sessionTimer.elapsedMs + (sessionTimer.running ? now - sessionTimer.startedAt : 0);
+      document.getElementById("sessionClock").textContent = formatClock(elapsedMs / 1000);
+      document.getElementById("sessionTimerButton").textContent = sessionTimer.running ? "Pausa" : elapsedMs ? "Riprendi" : "Avvia";
+      updateRestTimerWarning(false);
+      const clock = document.getElementById("exerciseClock");
+      const label = document.getElementById("activeTimerLabel");
+      const caption = document.getElementById("exerciseTimerCaption");
+      const stopButton = document.getElementById("stopExerciseTimer");
+      if (!exerciseTimer) {
+        clock.textContent = "00:00";
+        label.textContent = "Timer esercizio";
+        caption.textContent = "Serie, recuperi o intervalli";
+        updateTimerDialog(now);
+        return;
+      }
+      stopButton.hidden = false;
+      const timerNow = exerciseTimer.paused ? exerciseTimer.pausedAt : now;
+      if (exerciseTimer.mode === "interval") {
+        let segment = exerciseTimer.segments[exerciseTimer.segmentIndex];
+        let segmentChanged = false;
+        while (!exerciseTimer.paused && segment && now - exerciseTimer.segmentStartedAt >= segment.seconds * 1000) {
+          exerciseTimer.segmentStartedAt += segment.seconds * 1000;
+          exerciseTimer.segmentIndex += 1;
+          segment = exerciseTimer.segments[exerciseTimer.segmentIndex];
+          segmentChanged = true;
+          if (navigator.vibrate) navigator.vibrate(100);
+        }
+        if (!segment) {
+          stopExerciseClock("Intervalli completati. Ottimo lavoro!");
+          playTimerSound();
+          return;
+        }
+        if (segmentChanged) playTimerSound(false);
+        const remaining = segment.seconds - (timerNow - exerciseTimer.segmentStartedAt) / 1000;
+        label.textContent = segment.type === "run" ? "Corsa · segmento" : "Cammino · recupero";
+        clock.textContent = formatClock(remaining);
+        caption.textContent = `${exerciseTimer.segmentIndex + 1}/${exerciseTimer.segments.length} · ${segment.meters} m`;
+        updateTimerDialog(now);
+        return;
+      }
+      const exercise = sessionInfo(activeSession).exercises.find(item => item.id === exerciseTimer.exerciseId);
+      const name = exercise ? exercise.name : "Esercizio";
+      if (exerciseTimer.mode === "set") {
+        label.textContent = "Serie in corso";
+        clock.textContent = formatClock((timerNow - exerciseTimer.startedAt) / 1000);
+        caption.textContent = `${name} · cronometro serie`;
+        updateTimerDialog(now);
+        return;
+      }
+      const remaining = exerciseTimer.durationMs - (timerNow - exerciseTimer.startedAt);
+      if (remaining <= 0) {
+        stopExerciseClock(exerciseTimer.mode === "rest" ? "Recupero terminato." : "Timer terminato.");
+        playTimerSound();
+        if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+        return;
+      }
+      updateRestTimerWarning(exerciseTimer.mode === "rest" && remaining <= 10000);
+      label.textContent = exerciseTimer.mode === "rest" ? "Recupero" : "Timer esercizio";
+      clock.textContent = formatClock(remaining / 1000);
+      caption.textContent = name;
+      updateTimerDialog(now);
+    }
+    function renderTimerControls(exercise, week, session) {
+      if (exercise.kind === "run") {
+        return `<div class="exercise-timers"><button class="timer-action primary" type="button" data-exercise-timer="intervals" data-id="${exercise.id}">Avvia intervalli</button></div>`;
+      }
+      const controls = [];
+      const timedSet = exercise.kind === "load" || exercise.kind === "bodyweight";
+      const holdDuration = timedSet ? secondsFromText(exercise.prescription) : null;
+      const timedDuration = exercise.kind === "check" ? secondsFromText(exercise.prescription) : null;
+      if (timedSet) {
+        const saved = getExerciseLog(week, session, exercise.id);
+        const count = Number(saved.setsDone) || 0;
+        const total = plannedSets(exercise);
+        controls.push(`<button class="timer-action primary" type="button" data-exercise-timer="start-set" data-id="${exercise.id}" ${count >= total ? "disabled" : ""}>${count >= total ? `Serie registrate ${total}/${total}` : `Avvia serie ${count + 1}/${total}`}</button>`);
+        if (count > 0) {
+          const setInProgress = exerciseTimer?.mode === "set" && exerciseTimer.exerciseId === exercise.id;
+          controls.push(`<button class="timer-action" type="button" data-exercise-timer="undo-set" data-id="${exercise.id}" ${setInProgress ? "disabled" : ""}>Annulla ultima serie</button>`);
+        }
+        if (holdDuration) controls.push(`<button class="timer-action" type="button" data-exercise-timer="hold" data-id="${exercise.id}">Timer tenuta ${formatClock(holdDuration)}</button>`);
+      }
+      if (exercise.rest) {
+        const restSeconds = secondsFromText(exercise.rest);
+        if (restSeconds) controls.push(`<button class="timer-action" type="button" data-exercise-timer="rest" data-id="${exercise.id}">Recupero ${formatClock(restSeconds)}</button>`);
+      }
+      if (timedDuration) controls.push(`<button class="timer-action primary" type="button" data-exercise-timer="duration" data-id="${exercise.id}">Timer ${formatClock(timedDuration)}</button>`);
+      return controls.length ? `<div class="exercise-timers">${controls.join("")}</div>` : "";
+    }
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+    function weekKey(week, session) { return `${week}-${session}`; }
+    function sessionInfo(session) { return sessions[sessionOrder[session]]; }
+    function getLog(week, session) {
+      const key = weekKey(week, session);
+      if (!appState.logs[key]) appState.logs[key] = { completed: false, exercises: {} };
+      return appState.logs[key];
+    }
+    function getExerciseLog(week, session, exerciseId) {
+      const log = getLog(week, session);
+      if (!log.exercises[exerciseId]) log.exercises[exerciseId] = { done: false, value: "", distance: "", time: "", setsDone: 0 };
+      return log.exercises[exerciseId];
+    }
+    function currentPhase(week) { return pacePhases.find(phase => week >= phase.from && week <= phase.to); }
+    function secondsForPace(week) { return currentPhase(week).pace; }
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.round(seconds % 60);
+      return `${mins}:${String(secs).padStart(2, "0")}`;
+    }
+    function formatPace(seconds) { return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`; }
+    function formatKm(value) { return `${Number(value).toFixed(1).replace(".", ",")} km`; }
+    function totalKm(week) { return weekDistances[week - 1].reduce((sum, distance) => sum + distance, 0); }
+    function dateFor(week, session) {
+      const date = new Date(`${appState.startDate}T12:00:00`);
+      date.setDate(date.getDate() + (week - 1) * 7 + ({ A: 0, B: 2, C: 4 }[session]));
+      return date;
+    }
+    function dateLabel(date, includeYear = false) {
+      return new Intl.DateTimeFormat("it-IT", { weekday: "short", day: "numeric", month: "short", ...(includeYear ? { year: "numeric" } : {}) }).format(date);
+    }
+    function distanceKey(km) { return Number(km).toFixed(1); }
+    function runSegment(type, meters, pace) {
+      return { type, meters, seconds: Math.round(meters / 1000 * (type === "run" ? pace : 720)) };
+    }
+    function runPattern(week, session) {
+      const km = weekDistances[week - 1][distanceIndex[session]];
+      const pace = secondsForPace(week);
+      if (session === "C" && week >= 21) {
+        const repeat = week === 24 ? 200 : 400;
+        const runCount = 4;
+        const runSeconds = runCount * repeat / 1000 * pace;
+        const walkMeters = 400 + 3 * 200 + 400;
+        const walkSeconds = walkMeters / 1000 * 720;
+        const segments = [runSegment("walk", 400, pace)];
+        for (let index = 0; index < runCount; index += 1) {
+          segments.push(runSegment("run", repeat, pace));
+          if (index < runCount - 1) segments.push(runSegment("walk", 200, pace));
+        }
+        segments.push(runSegment("walk", 400, pace));
+        return {
+          km, pace, seconds: runSeconds + walkSeconds,
+          segments,
+          text: `400 m cammino di riscaldamento · 4×${repeat} m corsa (recupero 200 m camminando tra le prime 3) · 400 m cammino di defaticamento.`,
+          details: `${formatTime(400 / 1000 * 720)} cammino iniziale + 4×${formatTime(repeat / 1000 * pace)} corsa + 3×${formatTime(200 / 1000 * 720)} cammino + ${formatTime(400 / 1000 * 720)} cammino finale.`,
+          special: ""
+        };
+      }
+      const pattern = session === "C" ? bPatterns[week - 1] : acPatterns[distanceKey(km)];
+      const runSeconds = pattern.rounds * pattern.run / 1000 * pace;
+      const walkMeters = pattern.rounds * pattern.walk + (pattern.extraWalk || 0);
+      const walkSeconds = walkMeters / 1000 * 720;
+      const segments = [];
+      for (let index = 0; index < pattern.rounds; index += 1) {
+        segments.push(runSegment("run", pattern.run, pace), runSegment("walk", pattern.walk, pace));
+      }
+      if (pattern.extraWalk) segments.push(runSegment("walk", pattern.extraWalk, pace));
+      const tail = pattern.extraWalk ? ` + ${pattern.extraWalk} m cammino` : "";
+      const walkInBlocks = `${pattern.walk} m cammino`;
+      return {
+        km, pace, seconds: runSeconds + walkSeconds,
+        segments,
+        text: `${pattern.rounds}×(${pattern.run} m corsa + ${walkInBlocks})${tail}.`,
+        details: `${pattern.rounds}×(${formatTime(pattern.run / 1000 * pace)} corsa + ${formatTime(pattern.walk / 1000 * 720)} cammino)${pattern.extraWalk ? ` + ${formatTime(pattern.extraWalk / 1000 * 720)} cammino` : ""}.`,
+        special: session === "A" && km === 5 && week === 24 ? "Se hai completato la settimana 23 senza dolore, puoi provare 5 km continuativi: obiettivo 30:00. Altrimenti completa il run/cammino previsto." : ""
+      };
+    }
+    function sessionEstimate(week, session) {
+      const pattern = runPattern(week, session);
+      const [minOther, maxOther] = sessionInfo(session).range;
+      return {
+        km: pattern.km, runSeconds: pattern.seconds,
+        minSeconds: minOther * 60 + pattern.seconds,
+        maxSeconds: maxOther * 60 + pattern.seconds
+      };
+    }
+    function completedCount() {
+      return Object.values(appState.logs).filter(log => log && log.completed).length;
+    }
+    function requiredExercisesComplete(week, session) {
+      const log = getLog(week, session);
+      return sessionInfo(session).exercises.filter(exercise => !exercise.optional)
+        .every(exercise => Boolean(log.exercises[exercise.id]?.done));
+    }
+    function sessionIsComplete(week, session) { return Boolean(getLog(week, session).completed); }
+
+    function renderWeekOptions() {
+      const select = document.getElementById("weekSelect");
+      select.innerHTML = Array.from({ length: 24 }, (_, index) => {
+        const week = index + 1;
+        return `<option value="${week}">Settimana ${week}</option>`;
+      }).join("");
+      select.value = String(appState.week);
+    }
+    function renderSchedule() {
+      const grid = document.getElementById("scheduleGrid");
+      const week = appState.week;
+      grid.innerHTML = ["A", "B", "C"].map(session => {
+        const info = sessionInfo(session);
+        const estimate = sessionEstimate(week, session);
+        const date = dateFor(week, session);
+        const done = sessionIsComplete(week, session);
+        const selected = activeSession === session;
+        return `<article class="schedule-card ${done ? "complete" : ""} ${selected ? "selected" : ""}">
+          <div class="schedule-top"><span class="session-code code-${session.toLowerCase()}">${session}</span><span class="day-label">${info.shortDay} · ${dateLabel(date)}</span></div>
+          <h3 class="schedule-name">${info.name}</h3>
+          <div class="schedule-date">Stima: ${formatTime(estimate.minSeconds)}–${formatTime(estimate.maxSeconds)}</div>
+          <div class="schedule-run"><strong>${formatKm(estimate.km)}</strong><span>${formatTime(estimate.runSeconds)} corsa/cammino</span></div>
+          <div class="schedule-bottom"><span class="status-pill ${done ? "done" : ""}">${done ? "COMPLETATA" : "DA FARE"}</span><button class="open-session" type="button" data-open-session="${session}">Apri seduta →</button></div>
+        </article>`;
+      }).join("");
+      grid.querySelectorAll("[data-open-session]").forEach(button => button.addEventListener("click", () => {
+        activeSession = button.dataset.openSession;
+        renderAll();
+        document.getElementById("workoutHeading").scrollIntoView({ behavior: "smooth", block: "start" });
+      }));
+      document.getElementById("weekDistance").innerHTML = `Distanza totale: <strong>${formatKm(totalKm(week))}</strong>`;
+      document.getElementById("deloadBadge").hidden = !deloadWeeks.has(week);
+    }
+    function inputMarkup(week, session, exercise) {
+      const value = getExerciseLog(week, session, exercise.id);
+      if (exercise.kind === "load") {
+        return `<div class="input-group"><label for="field-${exercise.id}">Carico / variante</label><input id="field-${exercise.id}" data-value="${exercise.id}" type="text" value="${esc(value.value)}" placeholder="${esc(exercise.placeholder || "kg / nota")}" autocomplete="off"></div>`;
+      }
+      if (exercise.kind === "run") {
+        return `<div class="run-fields">
+          <div class="input-group"><label for="distance-${exercise.id}">Km fatti</label><input id="distance-${exercise.id}" data-distance="${exercise.id}" type="number" min="0" step="0.1" value="${esc(value.distance)}" placeholder="${exercisePrescription(week, session)}"></div>
+          <div class="input-group"><label for="time-${exercise.id}">Tempo</label><input id="time-${exercise.id}" data-time="${exercise.id}" type="text" value="${esc(value.time)}" placeholder="es. 24:30" autocomplete="off"></div>
+        </div>`;
+      }
+      return "";
+    }
+    function exercisePrescription(week, session) {
+      const estimate = sessionEstimate(week, session);
+      return estimate.km.toFixed(1);
+    }
+    function renderWorkout() {
+      const week = appState.week;
+      const session = activeSession;
+      const scope = weekKey(week, session);
+      if (timerScope !== scope) {
+        timerScope = scope;
+        sessionTimer = { running: false, elapsedMs: 0, startedAt: null };
+        exerciseTimer = null;
+        const timerDialog = document.getElementById("timerDialog");
+        if (timerDialog.open) timerDialog.close();
+      }
+      const info = sessionInfo(session);
+      const date = dateFor(week, session);
+      const estimate = sessionEstimate(week, session);
+      const phase = currentPhase(week);
+      const log = getLog(week, session);
+      document.getElementById("workoutKicker").textContent = `Seduta ${session} · ${info.day}`;
+      document.getElementById("workoutHeading").textContent = info.name;
+      document.getElementById("workoutMeta").textContent = `${dateLabel(date, true)} · stima ${formatTime(estimate.minSeconds)}–${formatTime(estimate.maxSeconds)} · corsa ${formatKm(estimate.km)}`;
+      const completeButton = document.getElementById("completeButton");
+      completeButton.textContent = log.completed ? "Seduta completata ✓" : "Segna seduta completa";
+      completeButton.classList.toggle("is-complete", Boolean(log.completed));
+      document.getElementById("exerciseList").innerHTML = info.exercises.map(exercise => {
+        const saved = getExerciseLog(week, session, exercise.id);
+        const isRun = exercise.kind === "run";
+        const run = isRun ? runPattern(week, session) : null;
+        const description = isRun ? `${run.text} ${run.details}${run.special ? ` ${run.special}` : ""}` : exercise.description;
+        const prescription = isRun ? `${formatKm(run.km)} · ritmo ${formatPace(phase.pace)}/km` : exercise.prescription;
+        return `<article class="exercise-row ${saved.done ? "is-done" : ""}">
+          <label class="exercise-check"><input type="checkbox" data-done="${exercise.id}" ${saved.done ? "checked" : ""} aria-label="Segna ${esc(exercise.name)} come completato"></label>
+          <div class="exercise-info">
+            <div class="exercise-name-line"><h3 class="exercise-name">${esc(exercise.name)}</h3></div>
+            <div class="exercise-prescription">${esc(prescription)}${exercise.rest ? ` <span class="exercise-rest">· recupero ${esc(exercise.rest)}</span>` : ""}</div>
+            <div class="exercise-description">${esc(description)}</div>
+            ${renderTimerControls(exercise, week, session)}
+          </div>
+          <div class="exercise-fields">${inputMarkup(week, session, exercise)}</div>
+        </article>`;
+      }).join("");
+      document.getElementById("exerciseList").querySelectorAll("[data-done]").forEach(input => input.addEventListener("change", () => {
+        const exercise = info.exercises.find(item => item.id === input.dataset.done);
+        getExerciseLog(week, session, exercise.id).done = input.checked;
+        if (requiredExercisesComplete(week, session)) getLog(week, session).completed = true;
+        else getLog(week, session).completed = false;
+        persist();
+        renderAll();
+      }));
+      document.getElementById("exerciseList").querySelectorAll("[data-value]").forEach(input => input.addEventListener("input", () => {
+        getExerciseLog(week, session, input.dataset.value).value = input.value;
+        persist();
+      }));
+      document.getElementById("exerciseList").querySelectorAll("[data-distance]").forEach(input => input.addEventListener("input", () => {
+        getExerciseLog(week, session, input.dataset.distance).distance = input.value;
+        persist();
+      }));
+      document.getElementById("exerciseList").querySelectorAll("[data-time]").forEach(input => input.addEventListener("input", () => {
+        getExerciseLog(week, session, input.dataset.time).time = input.value;
+        persist();
+      }));
+      document.getElementById("exerciseList").querySelectorAll("[data-exercise-timer]").forEach(button => button.addEventListener("click", () => {
+        const exercise = info.exercises.find(item => item.id === button.dataset.id);
+        const action = button.dataset.exerciseTimer;
+        if (action === "start-set") {
+          startSetTimer(week, session, exercise);
+        } else if (action === "undo-set") {
+          undoLastSet(week, session, exercise);
+          return;
+        } else if (action === "rest") {
+          startCountdown("rest", exercise, secondsFromText(exercise.rest));
+        } else if (action === "hold") {
+          startCountdown("duration", exercise, secondsFromText(exercise.prescription));
+        } else if (action === "duration") {
+          startCountdown("duration", exercise, secondsFromText(exercise.prescription));
+        } else if (action === "intervals") {
+          startIntervalTimer(week, session);
+        }
+        renderWorkout();
+      }));
+      completeButton.onclick = () => {
+        const sessionLog = getLog(week, session);
+        sessionLog.completed = true;
+        info.exercises.filter(exercise => !exercise.optional).forEach(exercise => {
+          getExerciseLog(week, session, exercise.id).done = true;
+        });
+        persist();
+        renderAll();
+        showToast(`Seduta ${session} registrata. Ottimo lavoro!`);
+      };
+      updateTimerDisplay();
+    }
+    function renderPace() {
+      const week = appState.week;
+      const phase = currentPhase(week);
+      const selectedRun = runPattern(week, activeSession);
+      const selectedEstimate = sessionEstimate(week, activeSession);
+      const selectedInfo = sessionInfo(activeSession);
+      const [a, b, c] = [2, 0, 1].map(index => weekDistances[week - 1][index]);
+      document.getElementById("runPanelSubtitle").textContent = `Settimana ${week} · dettagli della seduta ${activeSession} (${selectedInfo.day.toLowerCase()}).`;
+      document.getElementById("runPace").textContent = `${phase.label} /km`;
+      document.getElementById("weekTotalKm").textContent = formatKm(totalKm(week));
+      document.getElementById("distanceA").textContent = formatKm(a);
+      document.getElementById("distanceB").textContent = formatKm(b);
+      document.getElementById("distanceC").textContent = formatKm(c);
+      document.getElementById("runFocusLabel").textContent = `Seduta ${activeSession} · ${selectedInfo.day}`;
+      document.getElementById("runFocusDistance").textContent = formatKm(selectedRun.km);
+      document.getElementById("runFocusDuration").textContent = `${formatTime(selectedEstimate.runSeconds)} corsa/cammino`;
+      document.getElementById("runFocusPattern").textContent = `${selectedRun.text} ${selectedRun.details}${selectedRun.special ? ` ${selectedRun.special}` : ""}`;
+      document.getElementById("paceNote").textContent = week === 24
+        ? "Test dei 5 km solo se hai completato la settimana 23 senza dolore. In alternativa, ripeti il run/cammino previsto."
+        : "Ripeti la fase se non completi tutte le corse senza dolore. Nelle settimane di scarico non aumentare i carichi.";
+      document.getElementById("paceTable").innerHTML = pacePhases.map(phaseRow => {
+        const active = week >= phaseRow.from && week <= phaseRow.to;
+        const weeks = phaseRow.from === phaseRow.to ? `${phaseRow.from}` : `${phaseRow.from}–${phaseRow.to}`;
+        return `<tr class="${active ? "active" : ""}"><td>${weeks}</td><td>${phaseRow.label} /km</td><td>${formatTime(phaseRow.pace * .4)}</td></tr>`;
+      }).join("");
+    }
+    function renderStats() {
+      const done = completedCount();
+      const percent = Math.round(done / 72 * 100);
+      const doneThisWeek = ["A", "B", "C"].filter(session => sessionIsComplete(appState.week, session)).length;
+      const next = ["A", "B", "C"].find(session => !sessionIsComplete(appState.week, session)) || "A";
+      const nextDate = dateFor(appState.week, next);
+      const [a, b, c] = [2, 0, 1].map(index => weekDistances[appState.week - 1][index]);
+      document.getElementById("progressRing").style.setProperty("--progress", `${percent}%`);
+      document.getElementById("ringValue").textContent = `${percent}%`;
+      document.getElementById("heroWeek").textContent = `Settimana ${appState.week}`;
+      const firstDay = dateFor(appState.week, "A");
+      const lastDay = dateFor(appState.week, "C");
+      document.getElementById("heroDates").textContent = `${dateLabel(firstDay)} – ${dateLabel(lastDay)}`;
+      document.getElementById("heroCompleted").textContent = `${done} ${done === 1 ? "seduta completata" : "sedute completate"}`;
+      document.getElementById("weekFocus").textContent = deloadWeeks.has(appState.week) ? "Settimana di scarico" : appState.week === 24 ? "Settimana test →" : "Costanza prima di tutto";
+      document.getElementById("statProgress").textContent = `${percent}%`;
+      document.getElementById("statCompleted").textContent = `${done} di 72 sedute`;
+      document.getElementById("statWeek").textContent = `${doneThisWeek} / 3`;
+      document.getElementById("statKm").textContent = formatKm(a + b + c);
+      document.getElementById("statNext").textContent = `${next} · ${sessionInfo(next).shortDay.toLowerCase()}`;
+      document.getElementById("statNextDate").textContent = dateLabel(nextDate, true);
+    }
+    function renderAll() {
+      renderWeekOptions();
+      document.getElementById("startDate").value = appState.startDate;
+      renderStats();
+      renderSchedule();
+      renderWorkout();
+      renderPace();
+    }
+
+    const timerDialog = document.getElementById("timerDialog");
+    document.getElementById("closeTimerDialog").addEventListener("click", () => timerDialog.close());
+    timerDialog.addEventListener("close", updateTimerDisplay);
+    document.getElementById("openTimerDialog").addEventListener("click", openTimerDialog);
+    document.getElementById("pauseExerciseTimer").addEventListener("click", pauseExerciseClock);
+    document.getElementById("finishDialogSet").addEventListener("click", () => {
+      const exercise = sessionInfo(activeSession).exercises.find(item => item.id === exerciseTimer?.exerciseId);
+      if (exercise) finishSetTimer(appState.week, activeSession, exercise);
+    });
+    document.getElementById("stopDialogTimer").addEventListener("click", () => {
+      stopExerciseClock(exerciseTimer?.mode === "set" ? "Serie annullata, non registrata." : "Timer fermato.");
+    });
+    document.getElementById("sessionTimerButton").addEventListener("click", () => {
+      if (sessionTimer.running) {
+        sessionTimer.elapsedMs += Date.now() - sessionTimer.startedAt;
+        sessionTimer.running = false;
+        sessionTimer.startedAt = null;
+      } else {
+        startSessionClock();
+      }
+      updateTimerDisplay();
+    });
+    document.getElementById("resetSessionTimer").addEventListener("click", () => {
+      sessionTimer = { running: false, elapsedMs: 0, startedAt: null };
+      updateTimerDisplay();
+    });
+    document.getElementById("stopExerciseTimer").addEventListener("click", () => {
+      stopExerciseClock(exerciseTimer?.mode === "set" ? "Serie annullata, non registrata." : "Timer fermato.");
+    });
+    timerInterval = window.setInterval(updateTimerDisplay, 250);
+
+    document.getElementById("prevWeek").addEventListener("click", () => {
+      appState.week = Math.max(1, appState.week - 1);
+      persist();
+      renderAll();
+    });
+    document.getElementById("nextWeek").addEventListener("click", () => {
+      appState.week = Math.min(24, appState.week + 1);
+      persist();
+      renderAll();
+    });
+    document.getElementById("weekSelect").addEventListener("change", event => {
+      appState.week = Number(event.target.value);
+      persist();
+      renderAll();
+    });
+    document.getElementById("startDate").addEventListener("change", event => {
+      if (!event.target.value) return;
+      const selectedDate = new Date(`${event.target.value}T12:00:00`);
+      if (selectedDate.getDay() !== 0) {
+        showToast("Scegli una domenica per iniziare la settimana 1.");
+        event.target.value = appState.startDate;
+        return;
+      }
+      appState.startDate = event.target.value;
+      appState.week = 1;
+      persist();
+      renderAll();
+      showToast("Calendario aggiornato dalla settimana 1.");
+    });
+    document.getElementById("exportButton").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(appState, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "grit-progressi-allenamento.json";
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("Backup dei progressi esportato.");
+    });
+    const importFile = document.getElementById("importFile");
+    document.getElementById("importButton").addEventListener("click", () => importFile.click());
+    importFile.addEventListener("change", async () => {
+      const file = importFile.files?.[0];
+      if (!file) return;
+      try {
+        const importedState = normalizeBackupState(JSON.parse(await file.text()));
+        if (!window.confirm("Importare questo backup? I progressi attuali verranno sostituiti.")) return;
+        try {
+          localStorage.setItem(STORE_KEY, JSON.stringify(importedState));
+        } catch (error) {
+          console.error("Impossibile salvare il backup importato.", error);
+          showToast("Importazione non riuscita: impossibile salvare i dati in questo browser.");
+          return;
+        }
+        appState = importedState;
+        sessionTimer = { running: false, elapsedMs: 0, startedAt: null };
+        exerciseTimer = null;
+        timerScope = null;
+        if (timerDialog.open) timerDialog.close();
+        renderAll();
+        showToast("Backup importato correttamente.");
+      } catch (error) {
+        console.error("Impossibile importare il backup.", error);
+        showToast(error instanceof Error ? error.message : "Impossibile leggere il file di backup.");
+      } finally {
+        importFile.value = "";
+      }
+    });
+    document.getElementById("resetButton").addEventListener("click", () => {
+      if (!window.confirm("Vuoi cancellare tutti i carichi e i progressi salvati in questo browser?")) return;
+      appState.logs = {};
+      persist();
+      renderAll();
+      showToast("Progressi azzerati.");
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
