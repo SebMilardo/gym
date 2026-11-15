@@ -184,6 +184,19 @@
     .timer-action:hover { border-color: #b6c1b6; }
     .timer-action.primary { border-color: var(--ink); background: var(--ink); color: #fff; }
     .timer-action:disabled { opacity: .4; cursor: not-allowed; }
+    .run-tracker { margin-top: 12px; padding: 14px; border: 1px solid #d5eaf7; border-radius: 15px; background: #f5faff; }
+    .run-tracker[hidden] { display: none; }
+    .run-tracker-head, .run-tracker-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .run-tracker-title { color: var(--sky-dark); font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .run-tracker-status { margin-top: 3px; color: #56635a; font-size: 11px; font-weight: 750; }
+    .run-tracker-metrics { display: flex; gap: 16px; }
+    .run-tracker-metrics span { display: block; color: var(--muted); font-size: 8px; font-weight: 800; text-transform: uppercase; }
+    .run-tracker-metrics strong { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+    .run-route { display: block; width: 100%; height: 110px; margin: 10px 0; border-radius: 10px; background: #eaf5fc; }
+    .run-route polyline { fill: none; stroke: #2874a5; stroke-linecap: round; stroke-linejoin: round; stroke-width: 4; }
+    .run-route circle { fill: #2874a5; stroke: #fff; stroke-width: 2; }
+    .run-tracker-footer { align-items: flex-start; }
+    .run-tracker-hint { color: var(--muted); font-size: 9px; line-height: 1.5; }
     .exercise-list { padding: 0 16px 16px; }
     .exercise-row {
       display: grid; grid-template-columns: 38px minmax(0, 1fr) minmax(160px, .36fr); gap: 11px; align-items: start;
@@ -368,6 +381,10 @@
       .timer-number { font-size: 23px; }
       .timer-action { min-height: 48px; padding: 0 12px; font-size: 12px; flex: 1 1 130px; }
       .timer-actions .timer-action { flex: 0 0 auto; }
+      .run-tracker { padding: 12px; }
+      .run-tracker-head { align-items: flex-start; flex-direction: column; }
+      .run-tracker-metrics { width: 100%; justify-content: space-between; }
+      .run-tracker-footer { align-items: stretch; flex-direction: column; }
       .exercise-row { grid-template-columns: 48px minmax(0,1fr); gap: 7px; padding: 14px 3px; }
       .exercise-check { width: 48px; height: 48px; }
       .exercise-check input { width: 34px; height: 34px; }
@@ -547,7 +564,7 @@
           <div class="goal-row"><div class="goal-icon">↑</div><div class="goal-info"><strong>Trazioni</strong><span>Da 0 · forza e controllo</span></div><div class="goal-target">10</div></div>
           <div class="goal-row"><div class="goal-icon">↗</div><div class="goal-info"><strong>Piegamenti</strong><span>Una serie continua</span></div><div class="goal-target">40</div></div>
           <div class="goal-row"><div class="goal-icon">⌁</div><div class="goal-info"><strong>Corsa</strong><span>Ritmo obiettivo 6:00/km</span></div><div class="goal-target">5 km</div></div>
-          <div class="save-note"><i class="save-dot"></i><span>I tuoi progressi e carichi vengono salvati in questo browser. Esporta un backup per conservarne una copia o importalo per ripristinarla.</span></div>
+          <div class="save-note"><i class="save-dot"></i><span>I tuoi progressi, le tracce GPS e i carichi vengono salvati in questo browser. Esporta un backup per conservarne una copia o importalo per ripristinarla.</span></div>
         </section>
       </aside>
     </main>
@@ -718,7 +735,7 @@
     }
     function normalizeBackupState(saved) {
       if (!saved || typeof saved !== "object" || Array.isArray(saved)) throw new Error("Il file selezionato non è un backup valido.");
-      if (![2, 3, 4].includes(saved.schemaVersion)) throw new Error("Versione del backup non supportata.");
+      if (![2, 3, 4, 5].includes(saved.schemaVersion)) throw new Error("Versione del backup non supportata.");
       if (!saved.logs || typeof saved.logs !== "object" || Array.isArray(saved.logs)) throw new Error("Il backup non contiene un registro dei progressi valido.");
       if (!Number.isInteger(saved.week) || saved.week < 1 || saved.week > 24) throw new Error("La settimana salvata nel backup non è valida.");
       if (saved.schemaVersion >= 3) {
@@ -732,7 +749,7 @@
 
       let restoredLogs = saved.logs;
       if (saved.schemaVersion === 2) restoredLogs = remapLogs(restoredLogs, { A: "C", B: "A", C: "B" });
-      if (saved.schemaVersion !== 4) restoredLogs = remapLogs(restoredLogs, { A: "B", B: "C", C: "A" });
+      if (saved.schemaVersion !== 4 && saved.schemaVersion !== 5) restoredLogs = remapLogs(restoredLogs, { A: "B", B: "C", C: "A" });
       const logs = {};
       for (const [key, log] of Object.entries(restoredLogs)) {
         if (!/^(?:[1-9]|1\d|2[0-4])-[ABC]$/.test(key) || !log || typeof log !== "object" || Array.isArray(log) ||
@@ -755,13 +772,14 @@
             value: exercise.value ?? "",
             distance: exercise.distance ?? "",
             time: exercise.time ?? "",
-            setsDone
+            setsDone,
+            ...(exercise.track ? { track: normalizeRunTrack(exercise.track, true) } : {})
           };
         }
         logs[key] = { completed: log.completed ?? false, exercises };
       }
       return {
-        schemaVersion: 4,
+        schemaVersion: 5,
         startDate: saved.schemaVersion >= 3 ? alignToSunday(saved.startDate) : DEFAULT_START_DATE,
         week: saved.week,
         logs
@@ -775,9 +793,9 @@
           const logs = saved.logs && typeof saved.logs === "object" ? saved.logs : {};
           let restoredLogs = logs;
           if (saved.schemaVersion === 2) restoredLogs = remapLogs(restoredLogs, { A: "C", B: "A", C: "B" });
-          if (saved.schemaVersion !== 4) restoredLogs = remapLogs(restoredLogs, { A: "B", B: "C", C: "A" });
+          if (saved.schemaVersion !== 4 && saved.schemaVersion !== 5) restoredLogs = remapLogs(restoredLogs, { A: "B", B: "C", C: "A" });
           return {
-            schemaVersion: 4,
+            schemaVersion: 5,
             startDate: saved.schemaVersion >= 3 && /^\d{4}-\d{2}-\d{2}$/.test(saved.startDate || "") ? alignToSunday(saved.startDate) : startDate,
             week: Math.max(1, Math.min(24, Number(saved.week) || 1)),
             logs: restoredLogs
@@ -787,13 +805,17 @@
         console.error("Impossibile leggere i progressi salvati.", error);
         window.setTimeout(() => showToast("Non riesco a leggere il salvataggio locale. Puoi iniziare una nuova registrazione."), 0);
       }
-      return { schemaVersion: 4, startDate, week: defaultWeek(startDate), logs: {} };
+      return { schemaVersion: 5, startDate, week: defaultWeek(startDate), logs: {} };
     }
     let appState = loadState();
     let activeSession = "A";
     let toastTimer;
     let timerScope = null;
     let sessionTimer = { running: false, elapsedMs: 0, startedAt: null };
+    let trackingWatchId = null;
+    let trackingRef = null;
+    let trackingStatusMessage = "";
+    let trackingErrorNotified = false;
     let exerciseTimer = null;
     let timerInterval = null;
     let timerAudioContext = null;
@@ -801,6 +823,7 @@
 
     function persist() {
       try {
+        appState.schemaVersion = 5;
         localStorage.setItem(STORE_KEY, JSON.stringify(appState));
       } catch (error) {
         console.error("Impossibile salvare i progressi.", error);
@@ -1063,6 +1086,11 @@
       const elapsedMs = sessionTimer.elapsedMs + (sessionTimer.running ? now - sessionTimer.startedAt : 0);
       document.getElementById("sessionClock").textContent = formatClock(elapsedMs / 1000);
       document.getElementById("sessionTimerButton").textContent = sessionTimer.running ? "Pausa" : elapsedMs ? "Riprendi" : "Avvia";
+      const activeTrack = activeRunReference();
+      if (activeTrack && document.getElementById("runTrackerDuration")) {
+        document.getElementById("runTrackerDuration").textContent = formatClock(trackElapsedMs(activeTrack.track, now) / 1000);
+        document.getElementById("runTrackerDistance").textContent = formatTrackedKm(activeTrack.track.distanceMeters);
+      }
       updateRestTimerWarning(false);
       const clock = document.getElementById("exerciseClock");
       const label = document.getElementById("activeTimerLabel");
@@ -1124,7 +1152,7 @@
     }
     function renderTimerControls(exercise, week, session) {
       if (exercise.kind === "run") {
-        return `<div class="exercise-timers"><button class="timer-action primary" type="button" data-exercise-timer="intervals" data-id="${exercise.id}">Avvia intervalli</button></div>`;
+        return `<div class="exercise-timers"><button class="timer-action primary" type="button" data-exercise-timer="intervals" data-id="${exercise.id}">Avvia intervalli + GPS</button></div>`;
       }
       const controls = [];
       const timedSet = exercise.kind === "load" || exercise.kind === "bodyweight";
@@ -1162,6 +1190,289 @@
       const log = getLog(week, session);
       if (!log.exercises[exerciseId]) log.exercises[exerciseId] = { done: false, value: "", distance: "", time: "", setsDone: 0 };
       return log.exercises[exerciseId];
+    }
+    function normalizeRunTrack(track, imported = false) {
+      if (!track || typeof track !== "object" || Array.isArray(track) ||
+          !["recording", "paused", "stopped"].includes(track.status) ||
+          !Number.isFinite(track.startedAt) || track.startedAt <= 0 ||
+          !Number.isFinite(track.elapsedMs) || track.elapsedMs < 0 ||
+          !Number.isFinite(track.distanceMeters) || track.distanceMeters < 0 ||
+          !Array.isArray(track.points)) {
+        throw new Error("Il backup contiene una traccia GPS non valida.");
+      }
+      if (track.endedAt !== null && track.endedAt !== undefined && (!Number.isFinite(track.endedAt) || track.endedAt < track.startedAt)) {
+        throw new Error("Il backup contiene una traccia GPS non valida.");
+      }
+      const points = track.points.map(point => {
+        if (!point || typeof point !== "object" || Array.isArray(point) ||
+            !Number.isFinite(point.latitude) || point.latitude < -90 || point.latitude > 90 ||
+            !Number.isFinite(point.longitude) || point.longitude < -180 || point.longitude > 180 ||
+            !Number.isFinite(point.timestamp) || point.timestamp <= 0 ||
+            !Number.isFinite(point.accuracy) || point.accuracy < 0) {
+          throw new Error("Il backup contiene una posizione GPS non valida.");
+        }
+        return { latitude: point.latitude, longitude: point.longitude, timestamp: point.timestamp, accuracy: point.accuracy };
+      });
+      let elapsedMs = track.elapsedMs;
+      let status = track.status;
+      if (status === "recording") {
+        if (!Number.isFinite(track.segmentStartedAt) || track.segmentStartedAt < track.startedAt) {
+          throw new Error("Il backup contiene una traccia GPS non valida.");
+        }
+        if (imported) {
+          elapsedMs += Math.max(0, Date.now() - track.segmentStartedAt);
+          status = "paused";
+        }
+      }
+      return {
+        status, startedAt: track.startedAt, endedAt: track.endedAt ?? null, elapsedMs,
+        ...(status === "recording" ? { segmentStartedAt: track.segmentStartedAt } : {}),
+        distanceMeters: track.distanceMeters, points
+      };
+    }
+    function activeRunReference() {
+      for (const [key, log] of Object.entries(appState.logs)) {
+        const match = /^(\d+)-([ABC])$/.exec(key);
+        const track = log?.exercises?.run?.track;
+        if (match && track?.status === "recording") {
+          return { week: Number(match[1]), session: match[2], track };
+        }
+      }
+      return null;
+    }
+    function runTrackFor(reference) {
+      return appState.logs[weekKey(reference.week, reference.session)]?.exercises?.run?.track || null;
+    }
+    function haversineMeters(first, second) {
+      const radians = degrees => degrees * Math.PI / 180;
+      const latitudeDelta = radians(second.latitude - first.latitude);
+      const longitudeDelta = radians(second.longitude - first.longitude);
+      const latitude1 = radians(first.latitude);
+      const latitude2 = radians(second.latitude);
+      const arc = Math.sin(latitudeDelta / 2) ** 2 +
+        Math.cos(latitude1) * Math.cos(latitude2) * Math.sin(longitudeDelta / 2) ** 2;
+      return 6371000 * 2 * Math.atan2(Math.sqrt(arc), Math.sqrt(1 - arc));
+    }
+    function trackElapsedMs(track, now = Date.now()) {
+      return track.elapsedMs + (track.status === "recording" ? Math.max(0, now - track.segmentStartedAt) : 0);
+    }
+    function formatTrackedKm(meters) {
+      return `${(meters / 1000).toFixed(2).replace(".", ",")} km`;
+    }
+    function runTrackerMarkup(week, session) {
+      const active = activeRunReference();
+      const track = active?.track || getExerciseLog(week, session, "run").track;
+      if (!track) return "";
+      return `<section class="run-tracker" id="runTracker" aria-label="Tracciamento GPS della corsa">
+        <div class="run-tracker-head">
+          <div><div class="run-tracker-title" id="runTrackerTitle">Traccia GPS</div><div class="run-tracker-status" id="runTrackerStatus">In attesa del GPS</div></div>
+          <div class="run-tracker-metrics">
+            <div><span>Distanza</span><strong id="runTrackerDistance">0,00 km</strong></div>
+            <div><span>Durata</span><strong id="runTrackerDuration">00:00</strong></div>
+          </div>
+        </div>
+        <svg class="run-route" id="runRoute" viewBox="0 0 320 110" role="img" aria-label="Tracciato GPS schematico, senza mappa">
+          <polyline id="runRouteLine" points=""></polyline>
+          <circle id="runRouteStart" cx="0" cy="0" r="0"></circle>
+          <circle id="runRouteEnd" cx="0" cy="0" r="0"></circle>
+        </svg>
+        <div class="run-tracker-footer">
+          <span class="run-tracker-hint" id="runTrackerHint">La posizione viene salvata solo in questo browser e nei backup esportati.</span>
+          <button class="timer-action" id="stopRunTracking" type="button" hidden>Termina corsa</button>
+        </div>
+      </section>`;
+    }
+    function renderRunTracker() {
+      const panel = document.getElementById("runTracker");
+      if (!panel) return;
+      const active = activeRunReference();
+      const reference = active
+        ? { week: active.week, session: active.session, track: active.track }
+        : { week: appState.week, session: activeSession, track: getExerciseLog(appState.week, activeSession, "run").track };
+      const track = reference.track;
+      panel.hidden = !track;
+      if (!track) return;
+
+      document.getElementById("runTrackerTitle").textContent = `Traccia GPS · settimana ${reference.week} · seduta ${reference.session}`;
+      document.getElementById("runTrackerStatus").textContent = trackingStatusMessage ||
+        (track.status === "recording" ? "Registrazione GPS in corso"
+          : track.status === "paused" ? "GPS in pausa · riprendi dalla seduta"
+            : "Corsa terminata · traccia salvata");
+      document.getElementById("runTrackerDistance").textContent = formatTrackedKm(track.distanceMeters);
+      document.getElementById("runTrackerDuration").textContent = formatClock(trackElapsedMs(track) / 1000);
+      const hint = document.getElementById("runTrackerHint");
+      hint.textContent = track.points.length
+        ? `${track.points.length} posizioni registrate · dati conservati in questo browser e nei backup esportati.`
+        : "In attesa di un segnale GPS preciso (accuratezza entro 50 m).";
+      const stopButton = document.getElementById("stopRunTracking");
+      stopButton.hidden = track.status === "stopped";
+      const points = track.points;
+      const line = document.getElementById("runRouteLine");
+      const start = document.getElementById("runRouteStart");
+      const end = document.getElementById("runRouteEnd");
+      if (!points.length) {
+        line.setAttribute("points", "");
+        start.setAttribute("r", "0");
+        end.setAttribute("r", "0");
+        return;
+      }
+      const meanLatitude = points.reduce((sum, point) => sum + point.latitude, 0) / points.length;
+      const coordinates = points.map(point => ({
+        x: point.longitude * Math.cos(meanLatitude * Math.PI / 180),
+        y: point.latitude
+      }));
+      const minX = Math.min(...coordinates.map(point => point.x));
+      const maxX = Math.max(...coordinates.map(point => point.x));
+      const minY = Math.min(...coordinates.map(point => point.y));
+      const maxY = Math.max(...coordinates.map(point => point.y));
+      const width = maxX - minX || 1;
+      const height = maxY - minY || 1;
+      const scaled = coordinates.map(point => ({
+        x: 14 + (point.x - minX) / width * 292,
+        y: 14 + (maxY - point.y) / height * 82
+      }));
+      line.setAttribute("points", scaled.map(point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" "));
+      for (const [marker, point] of [[start, scaled[0]], [end, scaled[scaled.length - 1]]]) {
+        marker.setAttribute("cx", point.x.toFixed(1));
+        marker.setAttribute("cy", point.y.toFixed(1));
+        marker.setAttribute("r", points.length === 1 ? "5" : "4");
+      }
+    }
+    function startRunTracking(week, session) {
+      if (!navigator.geolocation) {
+        showToast("Il GPS non è disponibile. Apri l'app in un browser con geolocalizzazione e connessione HTTPS.");
+        return false;
+      }
+      const active = activeRunReference();
+      if (active) {
+        showToast(active.week === week && active.session === session ? "Il tracciamento GPS è già attivo." : "Termina prima la corsa GPS già in corso.");
+        return false;
+      }
+      const saved = getExerciseLog(week, session, "run");
+      if (saved.track?.status === "stopped" && !window.confirm("Avviare una nuova corsa? La traccia GPS precedente di questa seduta verrà sostituita.")) {
+        return false;
+      }
+      const now = Date.now();
+      if (saved.track?.status === "paused") {
+        saved.track.status = "recording";
+        saved.track.segmentStartedAt = now;
+      } else {
+        saved.track = { status: "recording", startedAt: now, segmentStartedAt: now, endedAt: null, elapsedMs: 0, distanceMeters: 0, points: [] };
+      }
+      trackingRef = { week, session };
+      const runReference = trackingRef;
+      trackingStatusMessage = "Ricerca del segnale GPS…";
+      trackingErrorNotified = false;
+      persist();
+      try {
+        trackingWatchId = navigator.geolocation.watchPosition(position => {
+          if (trackingRef !== runReference) return;
+          const track = runTrackFor(runReference);
+          if (!track || track.status !== "recording") return;
+          const { latitude, longitude, accuracy } = position.coords;
+          const timestamp = position.timestamp || Date.now();
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(accuracy) || accuracy > 50) {
+            trackingStatusMessage = Number.isFinite(accuracy) ? `Segnale GPS impreciso (±${Math.round(accuracy)} m), attendo.` : "Attendo un segnale GPS più preciso.";
+            renderRunTracker();
+            return;
+          }
+          const point = { latitude, longitude, timestamp, accuracy };
+          const previous = track.points[track.points.length - 1];
+          if (previous) {
+            const elapsedSeconds = Math.max(0, (timestamp - previous.timestamp) / 1000);
+            const segmentMeters = haversineMeters(previous, point);
+            if (!elapsedSeconds || segmentMeters > Math.max(50, elapsedSeconds * 12)) return;
+            track.distanceMeters += segmentMeters;
+          }
+          track.points.push(point);
+          trackingStatusMessage = "Registrazione GPS in corso";
+          persist();
+          renderRunTracker();
+        }, error => {
+          console.error("Errore di geolocalizzazione durante la corsa.", error);
+          if (trackingRef !== runReference) return;
+          if (error.code === 1) {
+            const track = runTrackFor(runReference);
+            if (track?.status === "recording") {
+              track.elapsedMs = trackElapsedMs(track);
+              track.status = "paused";
+              delete track.segmentStartedAt;
+            }
+            if (trackingWatchId !== null) navigator.geolocation.clearWatch(trackingWatchId);
+            trackingWatchId = null;
+            trackingRef = null;
+            persist();
+            trackingStatusMessage = "Permesso GPS negato · abilitalo nelle impostazioni del browser per riprendere.";
+            renderWorkout();
+          } else if (!trackingErrorNotified) {
+            trackingErrorNotified = true;
+            trackingStatusMessage = "Segnale GPS momentaneamente assente · continuo a cercarlo.";
+            renderRunTracker();
+            showToast(error.code === 3
+              ? "Il GPS non ha ancora trovato la posizione. Spostati all'aperto e attendi."
+              : "Segnale GPS non disponibile al momento. Continuo a cercarlo.");
+          }
+        }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+      } catch (error) {
+        console.error("Impossibile avviare il tracciamento GPS.", error);
+        const track = runTrackFor({ week, session });
+        if (track) {
+          track.elapsedMs = trackElapsedMs(track);
+          track.status = "paused";
+          delete track.segmentStartedAt;
+        }
+        trackingWatchId = null;
+        trackingRef = null;
+        persist();
+        trackingStatusMessage = "GPS non disponibile · controlla permessi e connessione HTTPS.";
+        showToast("Non riesco ad avviare il GPS. Verifica i permessi di posizione e che l'app sia aperta tramite HTTPS.");
+        renderWorkout();
+        return false;
+      }
+      renderWorkout();
+      return true;
+    }
+    function stopRunTracking(showMessage = true, reference = null) {
+      const active = activeRunReference() || (reference ? {
+        ...reference,
+        track: runTrackFor(reference)
+      } : null);
+      if (!active) return;
+      if (trackingWatchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(trackingWatchId);
+      trackingWatchId = null;
+      trackingRef = null;
+      active.track.elapsedMs = trackElapsedMs(active.track);
+      active.track.status = "stopped";
+      active.track.endedAt = Date.now();
+      delete active.track.segmentStartedAt;
+      trackingStatusMessage = "";
+      persist();
+      renderWorkout();
+      if (showMessage) showToast(`Corsa terminata · ${formatTrackedKm(active.track.distanceMeters)} registrati.`);
+    }
+    function pauseRunTracking() {
+      const active = activeRunReference();
+      if (!active) return;
+      if (trackingWatchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(trackingWatchId);
+      trackingWatchId = null;
+      trackingRef = null;
+      active.track.elapsedMs = trackElapsedMs(active.track);
+      active.track.status = "paused";
+      delete active.track.segmentStartedAt;
+      trackingStatusMessage = "Corsa in pausa · riprendi il GPS quando riapri l'app.";
+      persist();
+    }
+    function recoverInterruptedRuns() {
+      let recovered = false;
+      for (const log of Object.values(appState.logs)) {
+        const track = log?.exercises?.run?.track;
+        if (track?.status !== "recording") continue;
+        track.elapsedMs = trackElapsedMs(track);
+        track.status = "paused";
+        delete track.segmentStartedAt;
+        recovered = true;
+      }
+      if (recovered) persist();
     }
     function currentPhase(week) { return pacePhases.find(phase => week >= phase.from && week <= phase.to); }
     function secondsForPace(week) { return currentPhase(week).pace; }
@@ -1331,10 +1642,15 @@
             <div class="exercise-prescription">${esc(prescription)}${exercise.rest ? ` <span class="exercise-rest">· recupero ${esc(exercise.rest)}</span>` : ""}</div>
             <div class="exercise-description">${esc(description)}</div>
             ${renderTimerControls(exercise, week, session)}
+            ${isRun ? runTrackerMarkup(week, session) : ""}
           </div>
           <div class="exercise-fields">${inputMarkup(week, session, exercise)}</div>
         </article>`;
       }).join("");
+      const stopTrackingButton = document.getElementById("stopRunTracking");
+      if (stopTrackingButton) {
+        stopTrackingButton.onclick = () => stopRunTracking(true, { week, session });
+      }
       document.getElementById("exerciseList").querySelectorAll("[data-done]").forEach(input => input.addEventListener("change", () => {
         const exercise = info.exercises.find(item => item.id === input.dataset.done);
         getExerciseLog(week, session, exercise.id).done = input.checked;
@@ -1371,6 +1687,10 @@
           startCountdown("duration", exercise, secondsFromText(exercise.prescription));
         } else if (action === "intervals") {
           startIntervalTimer(week, session);
+          const activeTrack = activeRunReference();
+          if (!activeTrack || activeTrack.week !== week || activeTrack.session !== session) {
+            startRunTracking(week, session);
+          }
         }
         renderWorkout();
       }));
@@ -1384,6 +1704,7 @@
         renderAll();
         showToast(`Seduta ${session} registrata. Ottimo lavoro!`);
       };
+      renderRunTracker();
       updateTimerDisplay();
     }
     function renderPace() {
@@ -1455,6 +1776,7 @@
     document.getElementById("stopDialogTimer").addEventListener("click", () => {
       stopExerciseClock(exerciseTimer?.mode === "set" ? "Serie annullata, non registrata." : "Timer fermato.");
     });
+    window.addEventListener("pagehide", pauseRunTracking);
     document.getElementById("sessionTimerButton").addEventListener("click", () => {
       if (sessionTimer.running) {
         sessionTimer.elapsedMs += Date.now() - sessionTimer.startedAt;
@@ -1521,6 +1843,7 @@
       try {
         const importedState = normalizeBackupState(JSON.parse(await file.text()));
         if (!window.confirm("Importare questo backup? I progressi attuali verranno sostituiti.")) return;
+        stopRunTracking(false);
         try {
           localStorage.setItem(STORE_KEY, JSON.stringify(importedState));
         } catch (error) {
@@ -1529,10 +1852,12 @@
           return;
         }
         appState = importedState;
+        trackingStatusMessage = "";
         sessionTimer = { running: false, elapsedMs: 0, startedAt: null };
         exerciseTimer = null;
         timerScope = null;
         if (timerDialog.open) timerDialog.close();
+        recoverInterruptedRuns();
         renderAll();
         showToast("Backup importato correttamente.");
       } catch (error) {
@@ -1544,12 +1869,14 @@
     });
     document.getElementById("resetButton").addEventListener("click", () => {
       if (!window.confirm("Vuoi cancellare tutti i carichi e i progressi salvati in questo browser?")) return;
+      stopRunTracking(false);
       appState.logs = {};
       persist();
       renderAll();
       showToast("Progressi azzerati.");
     });
 
+    recoverInterruptedRuns();
     renderAll();
   </script>
   <script>
